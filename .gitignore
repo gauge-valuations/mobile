@@ -33,6 +33,9 @@ yarn-error.*
 # local env files
 .env*.local
 
+# env (contains the base URL; never commit — .env.example is the tracked template)
+.env
+
 # typescript
 *.tsbuildinfo
 
