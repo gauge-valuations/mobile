@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ScrollView, View, Text, ActivityIndicator, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -19,15 +19,20 @@ export default function ResultsScreen() {
   const [status, setStatus] = useState<Status>("idle");
   const [report, setReport] = useState<PropertyReport | null>(null);
   const [lastAddress, setLastAddress] = useState("");
+  // Ignore responses from superseded searches so out-of-order fetches cannot overwrite newer results.
+  const searchIdRef = useRef(0);
 
   async function search(address: string) {
+    const searchId = ++searchIdRef.current;
     setLastAddress(address);
     setStatus("loading");
     try {
       const result = await getPropertyReport(address);
+      if (searchId !== searchIdRef.current) return;
       setReport(result);
       setStatus("done");
     } catch {
+      if (searchId !== searchIdRef.current) return;
       setStatus("error");
     }
   }
