@@ -90,6 +90,6 @@ npm run web      # start the web target
 npm run lint     # expo lint
 ```
 
-## Project status
+## Status
 
-**Early / Phase 1.** One screen, working end-to-end on mock data; the backend-fetch path is implemented and payload-validated but not yet connected to a real backend (none exists in this repo). Planned but not built: investor/agent/seller features, accounts, maps, and alerts.
+Runs end-to-end on mock data; the backend-fetch path is implemented and payload-validated, pending connection to a live backend. Actively developed.
