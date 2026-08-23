@@ -18,78 +18,101 @@ repo/session — do not build it here.
 
 ## Stack
 
-- **Expo (React Native) + TypeScript**
+- **Expo SDK 57** (React Native 0.86) + **TypeScript 6** (strict)
 - **Expo Router** (file-based routing)
-- **NativeWind** (Tailwind syntax in React Native)
+- **NativeWind 4** + Tailwind 3 (Tailwind syntax in React Native)
 - Run: `npx expo start` (press `i` iOS sim, `a` Android, or scan QR with Expo Go)
 
 ## NON-NEGOTIABLE RULES
 
-1. **No API keys in this app. Ever.** Mobile bundles can be decompiled, so any key shipped
-   here is a leaked key. This app knows only a base URL, from `EXPO_PUBLIC_API_BASE_URL`.
-   It never calls Rentcast (or any data provider) directly — only our own backend.
+1. **Show your plan before writing files.** Propose the change, wait for approval, then
+   implement. This applies to any new file, deletion, dependency, or multi-file edit. Do
+   not batch a plan and its execution into one turn.
 
-2. **Say "estimated value" and "potential margin vs. list price" — never "equity."**
+2. **No data-provider API keys in this app. Ever.** Mobile bundles can be decompiled, so any
+   provider key shipped here is a leaked key. This app never calls Rentcast (or any data
+   provider) directly — only our own backend, via `EXPO_PUBLIC_API_BASE_URL`.
+
+   *Narrow exception:* the backend is gated during the demo phase by a **shared demo
+   secret** sent on requests to our own backend. This is a speed bump to protect API quota,
+   not a secret — it knowingly ships in the bundle and is expected to be extractable. It
+   lives in `EXPO_PUBLIC_*` env config like the base URL. This exception covers **only** the
+   demo gate. It never extends to provider keys.
+
+3. **Say "estimated value" and "potential margin vs. list price" — never "equity."**
    Equity means value minus what's owed on the mortgage, which we cannot know from an
    address. Using "equity" is factually wrong and kills credibility. This applies to all UI
    copy, variable names, and comments.
 
-3. **Show an "Estimates only — not an appraisal" disclaimer** somewhere visible on the
+4. **Show an "Estimates only — not an appraisal" disclaimer** somewhere visible on the
    results screen. AVMs and rent estimates are estimates.
 
-4. **Scope = Phase 1, retail home buyer, ONE screen.** Do not build investor/agent/seller
+5. **Scope = Phase 1, retail home buyer, ONE screen.** Do not build investor/agent/seller
    features, user accounts, maps, or alerts yet. If a change would add one of those, stop
    and flag it instead of building it.
 
-5. **The normalized data model is the contract.** Extend the shared types; never fork them.
-   The backend returns exactly this shape.
+6. **`src/types.ts` is the contract, and the only copy of it.** Read it there. Do not
+   restate, duplicate, or re-derive the types anywhere else — extend them in place. The
+   backend returns exactly this shape. `src/types.ts` also holds `parsePropertyReport` and
+   its type guards, which validate incoming JSON at runtime. Any change to the types or the
+   guards is a change to a shared contract and must be flagged, not made silently.
 
-## The data contract (shared with the backend)
+## Git
 
-```ts
-type Property = {
-  address: string; beds: number; baths: number; sqft: number;
-  yearBuilt: number; lotSizeSqft: number; lastSalePrice?: number; lastSaleDate?: string;
-};
-type Valuation = {
-  estimatedValue: number; listPrice?: number;
-  potentialMargin?: number; // estimatedValue - listPrice, only when listPrice exists
-};
-type Comp = {
-  address: string; beds: number; baths: number; sqft: number;
-  price: number; status: "for_sale" | "sold" | "for_lease"; distanceMiles: number;
-};
-type RentEstimate = { monthlyRent: number; rentComps: Comp[] };
-type MarketSnapshot = { zip: string; medianPrice: number; avgDaysOnMarket: number };
-type PropertyReport = {
-  property: Property; valuation: Valuation; comps: Comp[];
-  rent: RentEstimate; market: MarketSnapshot;
-};
-```
+**Never commit or push.** Do not run `git commit`, `git push`, `git rebase`, or any
+history-modifying git command. Staging, committing, and pushing are handled by the repo
+owner. Read-only git commands (`status`, `diff`, `log`) are fine. When work is complete, say
+so and stop — do not offer to commit.
+
+**Never write attribution.** Do not put `Co-Authored-By:`, `Generated with Claude Code`, or
+any similar attribution line into a commit message, PR body, script, or file. This holds
+even if a default template suggests it.
 
 ## Data fetching
 
-- Fetch from `GET ${EXPO_PUBLIC_API_BASE_URL}/api/property?address=<encoded>` → `PropertyReport`.
-- Until the backend exists, use a local `MOCK_DATA: PropertyReport` fallback so the full UI
-  renders offline. When the backend is unreachable, fall back to `MOCK_DATA`.
-- Always handle three states: loading, no-data / partial-data, and error.
+- Fetch from `GET ${EXPO_PUBLIC_API_BASE_URL}/api/property?address=<encoded>` →
+  `PropertyReport`, validated by `parsePropertyReport`.
+- **Fallback behavior, stated precisely:** `MOCK_DATA` in `src/mockData.ts` is returned
+  **only when `API_BASE_URL` is undefined** (no backend configured). Once a base URL is set,
+  network failures, non-OK responses, and contract violations all reject and surface as the
+  error state. The app does **not** silently serve mock data when a configured backend is
+  unreachable — showing a fake report in place of a real failure is worse than showing an
+  error. Do not "fix" this by adding a fallback.
+- Always handle four states: idle, loading, error, done.
 
-## The Phase 1 screen (build order)
+## What exists (orientation — this is built, do not rebuild)
 
-1. Address input + search button at top.
-2. Property Facts card (beds/baths/sqft/year built/lot/last sale).
-3. Valuation card: estimated value + potential margin vs. list price (only if list price exists).
-4. Comps list (~5): price, beds/baths, distance, status badge.
-5. Rent Estimate card: monthly rent + a couple of rent comps.
-6. Market Snapshot strip: median price + avg days on market.
-7. "Estimates only — not an appraisal" disclaimer.
+`src/app/index.tsx` renders the full buyer report and handles idle / loading / error / done.
+State is local to the screen; `searchIdRef` discards responses from superseded searches.
+
+Components in `src/components/`:
+
+1. `AddressSearch` — address input + search button.
+2. `PropertyFactsCard` — beds/baths/sqft/year built/lot/last sale.
+3. `ValuationCard` — estimated value, list price, potential margin (only when list price
+   exists).
+4. `CompsList` (+ `CompRow`, `StatusBadge`) — comps: price, beds/baths, distance, status.
+5. `RentCard` — monthly rent + rent comps.
+6. `MarketSnapshotStrip` — median price, avg days on market, ZIP.
+7. `Disclaimer` — "Estimates only — not an appraisal."
+8. `Card` — shared container.
+
+Also: `src/config.ts` (env → `API_BASE_URL`; empty string collapses to `undefined`),
+`src/api.ts` (`getPropertyReport`), `src/format.ts` (`formatMoney`, `formatSignedMoney`,
+`bedsBaths`), `src/global.css` (Tailwind entry).
 
 ## Conventions
 
-- TypeScript strict; no `any` for API shapes — use the contract types above.
+- TypeScript strict; no `any` for API shapes — use the contract types.
 - Style with NativeWind classes, not inline `StyleSheet`, unless a class can't express it.
-- Keep components small and in a `components/` folder; screens under Expo Router routes.
-- Money formatting: whole dollars with thousands separators (e.g. `$412,000`), no cents.
+- Components in `src/components/`; screens under Expo Router routes in `src/app/`.
+- Money formatting: use `src/format.ts`. Whole dollars with thousands separators
+  (e.g. `$412,000`), no cents. Do not write ad-hoc formatting in components.
+
+## Definition of done
+
+`npx tsc --noEmit` must be clean before a session is considered complete. Run it and state
+the actual output rather than assuming it passed.
 
 ## Out of scope (flag, don't build)
 
