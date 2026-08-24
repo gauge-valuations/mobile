@@ -1,6 +1,6 @@
 import { View, Text } from "react-native";
 import type { Comp } from "@/types";
-import { formatMoney, bedsBaths } from "@/format";
+import { formatMoney, bedsBaths, formatDistance } from "@/format";
 import { StatusBadge } from "./StatusBadge";
 
 export function CompRow({ comp }: { comp: Comp }) {
@@ -12,7 +12,7 @@ export function CompRow({ comp }: { comp: Comp }) {
         </Text>
         <View className="flex-row items-center gap-2">
           <Text className="text-xs text-neutral-500 dark:text-neutral-400">
-            {bedsBaths(comp.beds, comp.baths)} · {comp.distanceMiles} mi
+            {bedsBaths(comp.beds, comp.baths)} · {formatDistance(comp.distanceMiles)}
           </Text>
           <StatusBadge status={comp.status} />
         </View>

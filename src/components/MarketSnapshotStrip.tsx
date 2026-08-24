@@ -1,6 +1,6 @@
 import { View, Text } from "react-native";
 import type { MarketSnapshot } from "@/types";
-import { formatMoney } from "@/format";
+import { formatMoney, formatDaysOnMarket } from "@/format";
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
@@ -16,7 +16,7 @@ export function MarketSnapshotStrip({ market }: { market: MarketSnapshot }) {
     <View className="flex-row rounded-2xl bg-neutral-100 dark:bg-neutral-800 p-4">
       <Stat label="Median price" value={formatMoney(market.medianPrice)} />
       <View className="w-px bg-neutral-300 dark:bg-neutral-700" />
-      <Stat label="Avg days on market" value={String(market.avgDaysOnMarket)} />
+      <Stat label="Avg days on market" value={formatDaysOnMarket(market.avgDaysOnMarket)} />
       <View className="w-px bg-neutral-300 dark:bg-neutral-700" />
       <Stat label="ZIP" value={market.zip} />
     </View>

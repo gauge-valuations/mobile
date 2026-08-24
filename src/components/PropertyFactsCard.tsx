@@ -1,6 +1,6 @@
 import { View, Text } from "react-native";
 import type { Property } from "@/types";
-import { formatMoney } from "@/format";
+import { formatMoney, formatSaleDate } from "@/format";
 import { Card } from "./Card";
 
 function Fact({ label, value }: { label: string; value: string }) {
@@ -13,11 +13,10 @@ function Fact({ label, value }: { label: string; value: string }) {
 }
 
 export function PropertyFactsCard({ property }: { property: Property }) {
+  const saleDate = property.lastSaleDate ? formatSaleDate(property.lastSaleDate) : null;
   const lastSale =
     property.lastSalePrice !== undefined
-      ? `${formatMoney(property.lastSalePrice)}${
-          property.lastSaleDate ? ` (${property.lastSaleDate})` : ""
-        }`
+      ? `${formatMoney(property.lastSalePrice)}${saleDate ? ` (${saleDate})` : ""}`
       : "—";
 
   return (
