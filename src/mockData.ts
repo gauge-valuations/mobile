@@ -1,6 +1,10 @@
 import type { PropertyReport } from "./types";
 
 // Local fallback so the full UI renders offline / before the backend exists.
+// Values are in the wire format Rentcast actually returns rather than a tidied-up
+// form: ISO date-times, four-decimal comp distances, fractional market averages.
+// Keep them that way — the point is that this mock exercises src/format.ts the
+// same way real data will.
 // estimatedValue - listPrice = 625000 - 599000 = 26000 (potentialMargin).
 export const MOCK_DATA: PropertyReport = {
   property: {
@@ -11,7 +15,7 @@ export const MOCK_DATA: PropertyReport = {
     yearBuilt: 2008,
     lotSizeSqft: 7020,
     lastSalePrice: 512000,
-    lastSaleDate: "2019-06-14",
+    lastSaleDate: "2019-06-14T00:00:00.000Z",
   },
   valuation: {
     estimatedValue: 625000,
@@ -26,7 +30,7 @@ export const MOCK_DATA: PropertyReport = {
       sqft: 2380,
       price: 612000,
       status: "for_sale",
-      distanceMiles: 0.1,
+      distanceMiles: 0.0412,
     },
     {
       address: "908 Slaughter Ln, Austin, TX 78748",
@@ -35,7 +39,7 @@ export const MOCK_DATA: PropertyReport = {
       sqft: 2540,
       price: 640000,
       status: "sold",
-      distanceMiles: 0.4,
+      distanceMiles: 0.4137,
     },
     {
       address: "3317 Davis Ln, Austin, TX 78745",
@@ -44,7 +48,7 @@ export const MOCK_DATA: PropertyReport = {
       sqft: 2050,
       price: 565000,
       status: "sold",
-      distanceMiles: 0.7,
+      distanceMiles: 0.7218,
     },
     {
       address: "1450 Frate Barker Rd, Austin, TX 78748",
@@ -53,7 +57,7 @@ export const MOCK_DATA: PropertyReport = {
       sqft: 2460,
       price: 619000,
       status: "for_sale",
-      distanceMiles: 1.1,
+      distanceMiles: 1.0854,
     },
     {
       address: "722 Ralph Ablanedo Dr, Austin, TX 78748",
@@ -62,7 +66,7 @@ export const MOCK_DATA: PropertyReport = {
       sqft: 2300,
       price: 589000,
       status: "sold",
-      distanceMiles: 0.9,
+      distanceMiles: 0.8769,
     },
   ],
   rent: {
@@ -75,7 +79,7 @@ export const MOCK_DATA: PropertyReport = {
         sqft: 2390,
         price: 3150,
         status: "for_lease",
-        distanceMiles: 0.2,
+        distanceMiles: 0.1893,
       },
       {
         address: "2405 Bilbrook Pl, Austin, TX 78748",
@@ -84,13 +88,13 @@ export const MOCK_DATA: PropertyReport = {
         sqft: 2520,
         price: 3350,
         status: "for_lease",
-        distanceMiles: 0.6,
+        distanceMiles: 0.6104,
       },
     ],
   },
   market: {
     zip: "78745",
     medianPrice: 585000,
-    avgDaysOnMarket: 38,
+    avgDaysOnMarket: 38.42,
   },
 };

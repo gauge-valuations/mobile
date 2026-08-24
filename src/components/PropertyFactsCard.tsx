@@ -1,6 +1,6 @@
 import { View, Text } from "react-native";
 import type { Property } from "@/types";
-import { formatMoney, formatSaleDate } from "@/format";
+import { formatMoney, formatSaleDate, formatSqft } from "@/format";
 import { Card } from "./Card";
 
 function Fact({ label, value }: { label: string; value: string }) {
@@ -27,9 +27,9 @@ export function PropertyFactsCard({ property }: { property: Property }) {
       <View className="flex-row flex-wrap">
         <Fact label="Beds" value={String(property.beds)} />
         <Fact label="Baths" value={String(property.baths)} />
-        <Fact label="Sqft" value={property.sqft.toLocaleString("en-US")} />
+        <Fact label="Sqft" value={formatSqft(property.sqft)} />
         <Fact label="Year built" value={String(property.yearBuilt)} />
-        <Fact label="Lot size" value={`${property.lotSizeSqft.toLocaleString("en-US")} sqft`} />
+        <Fact label="Lot size" value={`${formatSqft(property.lotSizeSqft)} sqft`} />
         <Fact label="Last sale" value={lastSale} />
       </View>
     </Card>

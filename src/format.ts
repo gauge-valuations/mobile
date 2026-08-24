@@ -47,3 +47,10 @@ export function formatDistance(miles: number): string {
 export function formatDaysOnMarket(days: number): string {
   return String(Math.round(days));
 }
+
+// Square footage: whole number with thousands separators, no unit (e.g. "2,410").
+// The unit stays at the call site — the facts grid labels living area with a
+// column header but spells out "sqft" inline for lot size.
+export function formatSqft(value: number): string {
+  return Math.round(value).toLocaleString("en-US");
+}
