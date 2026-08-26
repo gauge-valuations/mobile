@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { ScrollView, View, Text, ActivityIndicator, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { getPropertyReport } from "@/api";
+import { getPropertyReport, PropertyReportError, type FetchFailureKind } from "@/api";
 import type { PropertyReport } from "@/types";
 import { AddressSearch } from "@/components/AddressSearch";
 import { PropertyFactsCard } from "@/components/PropertyFactsCard";
@@ -12,12 +12,41 @@ import { RentCard } from "@/components/RentCard";
 import { MarketSnapshotStrip } from "@/components/MarketSnapshotStrip";
 import { Disclaimer } from "@/components/Disclaimer";
 
-type Status = "idle" | "loading" | "error" | "done";
+// What the screen is showing. A discriminated union rather than a flat status plus
+// parallel state, so "error with no reason" and "done with no report" are not
+// representable.
+type Screen =
+  | { kind: "idle" }
+  | { kind: "loading" }
+  | { kind: "error"; failure: FetchFailureKind }
+  | { kind: "done"; report: PropertyReport };
+
+// Keyed by FetchFailureKind so adding a kind fails to compile until its copy and
+// retry policy are decided. Same pattern as StatusBadge.
+const FAILURE_COPY: Record<FetchFailureKind, string> = {
+  bad_address: "We couldn't read that address. Check the spelling and try again.",
+  not_found: "We don't have a report for that address yet.",
+  quota: "Reports are temporarily unavailable. Please try again later.",
+  server: "Something went wrong fetching this report.",
+  network: "We couldn't reach the server. Check your connection and try again.",
+  invalid: "Something went wrong fetching this report.",
+};
+
+// Retry only helps when the failure might not recur. A bad or unknown address and
+// an exhausted quota will fail identically on a second tap; a contract violation is
+// a backend bug that re-fetching cannot fix.
+const RETRYABLE: Record<FetchFailureKind, boolean> = {
+  bad_address: false,
+  not_found: false,
+  quota: false,
+  server: true,
+  network: true,
+  invalid: false,
+};
 
 // The one Phase 1 retail-buyer screen. Enter an address -> see the report.
 export default function ResultsScreen() {
-  const [status, setStatus] = useState<Status>("idle");
-  const [report, setReport] = useState<PropertyReport | null>(null);
+  const [screen, setScreen] = useState<Screen>({ kind: "idle" });
   const [lastAddress, setLastAddress] = useState("");
   // Ignore responses from superseded searches so out-of-order fetches cannot overwrite newer results.
   const searchIdRef = useRef(0);
@@ -25,24 +54,26 @@ export default function ResultsScreen() {
   async function search(address: string) {
     const searchId = ++searchIdRef.current;
     setLastAddress(address);
-    setStatus("loading");
+    setScreen({ kind: "loading" });
     try {
-      const result = await getPropertyReport(address);
+      const report = await getPropertyReport(address);
       if (searchId !== searchIdRef.current) return;
-      setReport(result);
-      setStatus("done");
-    } catch {
+      setScreen({ kind: "done", report });
+    } catch (error) {
       if (searchId !== searchIdRef.current) return;
-      setStatus("error");
+      setScreen({
+        kind: "error",
+        failure: error instanceof PropertyReportError ? error.kind : "server",
+      });
     }
   }
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-50 dark:bg-black" edges={["top", "left", "right"]}>
       <ScrollView contentContainerClassName="p-4 gap-4" keyboardShouldPersistTaps="handled">
-        <AddressSearch onSearch={search} loading={status === "loading"} />
+        <AddressSearch onSearch={search} loading={screen.kind === "loading"} />
 
-        {status === "idle" ? (
+        {screen.kind === "idle" ? (
           <View className="items-center py-16 px-6">
             <Text className="text-base text-center text-neutral-500 dark:text-neutral-400">
               Enter an address above to see property facts, an estimated value, comparable homes,
@@ -51,7 +82,7 @@ export default function ResultsScreen() {
           </View>
         ) : null}
 
-        {status === "loading" ? (
+        {screen.kind === "loading" ? (
           <View className="items-center py-16 gap-3">
             <ActivityIndicator />
             <Text className="text-sm text-neutral-500 dark:text-neutral-400">
@@ -60,27 +91,29 @@ export default function ResultsScreen() {
           </View>
         ) : null}
 
-        {status === "error" ? (
+        {screen.kind === "error" ? (
           <View className="items-center py-16 gap-3 px-6">
             <Text className="text-base text-center text-neutral-700 dark:text-neutral-300">
-              Something went wrong fetching this report.
+              {FAILURE_COPY[screen.failure]}
             </Text>
-            <Pressable
-              onPress={() => search(lastAddress)}
-              className="rounded-xl bg-blue-600 px-5 py-3"
-            >
-              <Text className="text-base font-semibold text-white">Retry</Text>
-            </Pressable>
+            {RETRYABLE[screen.failure] ? (
+              <Pressable
+                onPress={() => search(lastAddress)}
+                className="rounded-xl bg-blue-600 px-5 py-3"
+              >
+                <Text className="text-base font-semibold text-white">Retry</Text>
+              </Pressable>
+            ) : null}
           </View>
         ) : null}
 
-        {status === "done" && report ? (
+        {screen.kind === "done" ? (
           <View className="gap-4">
-            <PropertyFactsCard property={report.property} />
-            <ValuationCard valuation={report.valuation} />
-            <CompsList comps={report.comps} />
-            <RentCard rent={report.rent} />
-            <MarketSnapshotStrip market={report.market} />
+            <PropertyFactsCard property={screen.report.property} />
+            <ValuationCard valuation={screen.report.valuation} />
+            <CompsList comps={screen.report.comps} />
+            <RentCard rent={screen.report.rent} />
+            <MarketSnapshotStrip market={screen.report.market} />
             <Disclaimer />
           </View>
         ) : null}
