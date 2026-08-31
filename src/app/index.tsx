@@ -29,6 +29,7 @@ const FAILURE_COPY: Record<FetchFailureKind, string> = {
   quota: "Reports are temporarily unavailable. Please try again later.",
   server: "Something went wrong fetching this report.",
   network: "We couldn't reach the server. Check your connection and try again.",
+  timeout: "The server took too long to respond. Please try again.",
   invalid: "Something went wrong fetching this report.",
 };
 
@@ -41,6 +42,7 @@ const RETRYABLE: Record<FetchFailureKind, boolean> = {
   quota: false,
   server: true,
   network: true,
+  timeout: true,
   invalid: false,
 };
 

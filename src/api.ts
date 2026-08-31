@@ -14,7 +14,15 @@ export type FetchFailureKind =
   | "quota" // 402 — our data-provider budget is exhausted. Operator problem.
   | "server" // 5xx — backend or upstream failure
   | "network" // the request never completed (offline, DNS, connection reset)
+  | "timeout" // the connection was fine; the backend did not answer in time
   | "invalid"; // 200, but the payload did not match the contract
+
+// How long to wait for our backend before giving up. Sized for a cold Vercel
+// function making up to four upstream Rentcast calls (~7-10s at p99). The backend
+// route's maxDuration should be set at or below this — Vercel's default is now
+// 300s on every plan, and a function whose client has already given up should not
+// keep running for another five minutes.
+const REQUEST_TIMEOUT_MS = 15_000;
 
 export class PropertyReportError extends Error {
   readonly kind: FetchFailureKind;
@@ -42,31 +50,56 @@ export async function getPropertyReport(address: string): Promise<PropertyReport
     return MOCK_DATA;
   }
 
-  let res: Response;
-  try {
-    res = await fetch(`${API_BASE_URL}/api/property?address=${encodeURIComponent(address)}`);
-  } catch {
-    throw new PropertyReportError("network", "The request could not be completed");
-  }
+  // Manual AbortController rather than AbortSignal.timeout(): React Native
+  // polyfills AbortSignal from abort-controller@3.0.0, which has no static
+  // timeout(). TypeScript's DOM lib DOES declare it, so the modern form
+  // typechecks clean and then throws at runtime on device. Do not "modernize"
+  // this without checking the polyfill first.
+  const controller = new AbortController();
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, REQUEST_TIMEOUT_MS);
 
-  if (!res.ok) {
-    const kind = kindForStatus(res.status);
-    if (kind === "quota") {
-      console.error(
-        "[getPropertyReport] Data provider quota exhausted (402). Reports will keep " +
-          "failing until the quota resets or the plan is upgraded."
-      );
+  try {
+    let res: Response;
+    try {
+      res = await fetch(`${API_BASE_URL}/api/property?address=${encodeURIComponent(address)}`, {
+        signal: controller.signal,
+      });
+    } catch {
+      throw timedOut
+        ? new PropertyReportError("timeout", "The request timed out")
+        : new PropertyReportError("network", "The request could not be completed");
     }
-    throw new PropertyReportError(kind, `Request failed (${res.status})`);
-  }
 
-  try {
-    return parsePropertyReport(await res.json());
-  } catch (cause) {
-    console.error(
-      "[getPropertyReport] Response did not match the PropertyReport contract:",
-      cause instanceof Error ? cause.message : cause
-    );
-    throw new PropertyReportError("invalid", "Response did not match the contract");
+    if (!res.ok) {
+      const kind = kindForStatus(res.status);
+      if (kind === "quota") {
+        console.error(
+          "[getPropertyReport] Data provider quota exhausted (402). Reports will keep " +
+            "failing until the quota resets or the plan is upgraded."
+        );
+      }
+      throw new PropertyReportError(kind, `Request failed (${res.status})`);
+    }
+
+    try {
+      return parsePropertyReport(await res.json());
+    } catch (cause) {
+      // A stalled body read aborts too. Attribute it to the timeout rather than
+      // letting it masquerade as a contract violation.
+      if (timedOut) {
+        throw new PropertyReportError("timeout", "The request timed out");
+      }
+      console.error(
+        "[getPropertyReport] Response did not match the PropertyReport contract:",
+        cause instanceof Error ? cause.message : cause
+      );
+      throw new PropertyReportError("invalid", "Response did not match the contract");
+    }
+  } finally {
+    clearTimeout(timer);
   }
 }
