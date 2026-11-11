@@ -57,7 +57,7 @@ export function ValuationCard({ valuation }: { valuation: Valuation }) {
         </View>
       ) : (
         <Text className="text-sm text-neutral-500 dark:text-neutral-400">
-          Not currently listed, so there&apos;s no list price to compare.
+          No current list price, so no potential margin.
         </Text>
       )}
 

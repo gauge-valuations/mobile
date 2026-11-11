@@ -24,13 +24,15 @@ type Screen =
 // Keyed by FetchFailureKind so adding a kind fails to compile until its copy and
 // retry policy are decided. Same pattern as StatusBadge.
 const FAILURE_COPY: Record<FetchFailureKind, string> = {
-  bad_address: "We couldn't read that address. Check the spelling and try again.",
-  not_found: "We don't have a report for that address yet.",
-  quota: "Reports are temporarily unavailable. Please try again later.",
-  server: "Something went wrong fetching this report.",
-  network: "We couldn't reach the server. Check your connection and try again.",
-  timeout: "The server took too long to respond. Please try again.",
-  invalid: "Something went wrong fetching this report.",
+  bad_address: "We couldn't make sense of that address. Check the street, city and ZIP, then try again.",
+  not_found:
+    "We couldn't find property data for that address. Check the street, city and ZIP, or tap one of the sample addresses above.",
+  quota:
+    "This demo has reached its monthly data limit, so new addresses can't be looked up right now. The two sample addresses above always work. Tap one to see a full report.",
+  server: "We couldn't load this report right now. Please try again in a moment.",
+  network: "We couldn't connect. Check your internet connection and try again.",
+  timeout: "This is taking longer than usual. Please try again.",
+  invalid: "Something went wrong loading this report. Try a different address or one of the samples above.",
 };
 
 // Retry only helps when the failure might not recur. A bad or unknown address and

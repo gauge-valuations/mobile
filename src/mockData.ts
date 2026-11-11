@@ -1,6 +1,7 @@
 import type { PropertyReport } from "./types";
 
-// Local fallback so the full UI renders offline / before the backend exists.
+// Local fallback, used only when no backend base URL is configured, so the full
+// UI renders for local work without a backend.
 // Values are in the wire format Rentcast actually returns rather than a tidied-up
 // form: ISO date-times, four-decimal comp distances, fractional market averages.
 // Keep them that way — the point is that this mock exercises src/format.ts the
@@ -127,7 +128,7 @@ export const MOCK_DATA: PropertyReport = {
 };
 
 // Same home, but not for sale: no listPrice and no potentialMargin, so the
-// Valuation card shows its "Not currently listed" line instead.
+// Valuation card shows its "No current list price" note instead.
 // To see it on screen, temporarily change `return MOCK_DATA;` in src/api.ts to
 // `return MOCK_DATA_UNLISTED;` (and import it). Revert before committing.
 export const MOCK_DATA_UNLISTED: PropertyReport = {

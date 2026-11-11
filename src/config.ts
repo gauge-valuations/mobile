@@ -1,7 +1,7 @@
 // API configuration. This app reads ONLY a base URL — never an API key.
 // EXPO_PUBLIC_ vars are embedded in the shipped bundle, which is safe for a
 // public URL but would be fatal for a secret. The Rentcast key lives in the
-// backend, never here. See CLAUDE.md rule #1.
+// backend, never here. See CLAUDE.md rule #2.
 
 // Normalize before the falsy check, not after: a value of "/" or "   " must
 // collapse to undefined (no backend configured) rather than to "", which would

@@ -42,7 +42,7 @@ function kindForStatus(status: number): FetchFailureKind {
 }
 
 // Fetches a normalized PropertyReport from OUR backend.
-// When no base URL is configured (pre-backend / offline), returns MOCK_DATA.
+// When no base URL is configured (local UI work without a backend), returns MOCK_DATA.
 // When a base URL is set, failures and invalid payloads reject so the UI can
 // show an error instead of silently serving hardcoded mock data.
 export async function getPropertyReport(address: string): Promise<PropertyReport> {

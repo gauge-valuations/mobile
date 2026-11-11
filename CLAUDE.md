@@ -80,7 +80,18 @@ even if a default template suggests it.
   error state. The app does **not** silently serve mock data when a configured backend is
   unreachable — showing a fake report in place of a real failure is worse than showing an
   error. Do not "fix" this by adding a fallback.
+- Requests time out after 15 seconds. Failures are classified in `src/api.ts` as
+  `FetchFailureKind` (`bad_address` 400, `not_found` 404, `quota` 402, `server`, `network`,
+  `timeout`, `invalid`). The user-facing copy and retry policy per kind live in
+  `FAILURE_COPY` and `RETRYABLE` in `src/app/index.tsx`.
 - Always handle four states: idle, loading, error, done.
+
+## Deployment
+
+The web build is deployed at https://gauge-valuations.vercel.app (Vercel, built from
+`main` with `npm run build:web`, output `dist`, `EXPO_PUBLIC_*` set at build time). The two
+`SAMPLE_ADDRESSES` are cached on the backend and always load, even after the demo's
+monthly lookup limit is reached; keep the list in sync with the backend.
 
 ## What exists (orientation — this is built, do not rebuild)
 
@@ -94,11 +105,12 @@ Components in `src/components/`:
 2. `PropertyFactsCard` — beds/baths/sqft/year built/lot/last sale. Year built and lot size
    are optional and show "—" when missing.
 3. `ValuationCard` — estimated value with optional $/sqft, value range, and low-confidence
-   note; list price and potential margin only when list price exists, otherwise a
-   "Not currently listed" line.
+   note; list price and potential margin only when list price exists, otherwise the note
+   "No current list price, so no potential margin."
 4. `CompsList` (+ `CompRow`, `StatusBadge`) — comps: price, optional $/sqft, beds/baths,
    distance, status. `off_market` = inactive listing, not a confirmed sale (price is the
-   last asking price); badge "Off market", neutral gray.
+   last asking price); badge "Off market", neutral gray. Lists longer than 5 rows
+   collapse behind `ShowAllToggle` ("Show all N"), which `RentCard` also uses.
 5. `RentCard` — monthly rent with optional rent $/sqft and range, plus rent comps.
 6. `MarketSnapshotStrip` — median price, avg days on market, ZIP.
 7. `Disclaimer` — "Estimates only — not an appraisal."
@@ -109,7 +121,8 @@ Also: `src/config.ts` (env → `API_BASE_URL` and `DEMO_KEY`; empty string colla
 set), `src/format.ts` (`formatMoney`, `formatSignedMoney`, `formatMoneyRange`,
 `formatPricePerSqft`, `bedsBaths`, …), `src/mockData.ts` (`MOCK_DATA`, plus
 `MOCK_DATA_UNLISTED` for checking the not-listed state; not wired in), `src/global.css`
-(Tailwind entry). `npm run build:web` exports the static web bundle to `dist/` (gitignored).
+(Tailwind entry), `src/app/_layout.tsx` (root stack; sets the web page title via
+`expo-router/head`), `src/app/+html.tsx` (static web document head, web export only). `npm run build:web` exports the static web bundle to `dist/` (gitignored).
 
 ## Conventions
 
