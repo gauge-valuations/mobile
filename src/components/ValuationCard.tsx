@@ -16,8 +16,11 @@ export function ValuationCard({ valuation }: { valuation: Valuation }) {
     valueRangeHigh,
     lowConfidence,
   } = valuation;
-  const showMargin = listPrice !== undefined && potentialMargin !== undefined;
-  const positive = (potentialMargin ?? 0) >= 0;
+  // The backend may omit potentialMargin; derive it from the list price when it's missing.
+  const margin =
+    listPrice === undefined ? undefined : (potentialMargin ?? estimatedValue - listPrice);
+  const showMargin = margin !== undefined;
+  const positive = (margin ?? 0) >= 0;
   // A range needs both ends; one alone is not shown.
   const showRange = valueRangeLow !== undefined && valueRangeHigh !== undefined;
 
@@ -68,7 +71,7 @@ export function ValuationCard({ valuation }: { valuation: Valuation }) {
               positive ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
             }`}
           >
-            {formatSignedMoney(potentialMargin as number)}
+            {formatSignedMoney(margin as number)}
           </Text>
         </View>
       ) : null}
