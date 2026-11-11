@@ -17,7 +17,7 @@ export function PropertyFactsCard({ property }: { property: Property }) {
   const lastSale =
     property.lastSalePrice !== undefined
       ? `${formatMoney(property.lastSalePrice)}${saleDate ? ` (${saleDate})` : ""}`
-      : "—";
+      : (saleDate ?? "—"); // no price: show the date alone when there is one
 
   return (
     <Card title="Property facts">

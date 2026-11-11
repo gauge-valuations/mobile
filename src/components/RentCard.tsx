@@ -1,13 +1,17 @@
+import { useState } from "react";
 import { View, Text } from "react-native";
 import type { RentEstimate } from "@/types";
 import { formatMoney, formatMoneyRange, formatPricePerSqft } from "@/format";
 import { Card } from "./Card";
 import { CompRow } from "./CompRow";
+import { COLLAPSED_ROW_COUNT, ShowAllToggle } from "./ShowAllToggle";
 
 export function RentCard({ rent }: { rent: RentEstimate }) {
   const { rentPerSqft, rentRangeLow, rentRangeHigh } = rent;
   // A range needs both ends; one alone is not shown.
   const showRange = rentRangeLow !== undefined && rentRangeHigh !== undefined;
+  const [expanded, setExpanded] = useState(false);
+  const shownComps = expanded ? rent.rentComps : rent.rentComps.slice(0, COLLAPSED_ROW_COUNT);
 
   return (
     <Card title="Rent estimate">
@@ -35,9 +39,14 @@ export function RentCard({ rent }: { rent: RentEstimate }) {
           <Text className="text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400 pt-1">
             Rent comps
           </Text>
-          {rent.rentComps.map((comp, i) => (
+          {shownComps.map((comp, i) => (
             <CompRow key={`${comp.address}-${i}`} comp={comp} monthly />
           ))}
+          <ShowAllToggle
+            total={rent.rentComps.length}
+            expanded={expanded}
+            onToggle={() => setExpanded((e) => !e)}
+          />
         </View>
       ) : null}
     </Card>

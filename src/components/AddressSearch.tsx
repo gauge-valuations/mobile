@@ -1,6 +1,18 @@
 import { useState } from "react";
-import { View, TextInput, Pressable, Text } from "react-native";
+import { View, TextInput, Pressable, Text, Platform, type TextStyle } from "react-native";
 import { SAMPLE_ADDRESSES } from "@/sampleAddresses";
+
+const IS_WEB = Platform.OS === "web";
+
+// Web focus ring: a 2px outline in the same blue as the focused border, in place
+// of the browser's default ring. Native has no outline; the border alone shows focus.
+const WEB_FOCUS_OUTLINE: TextStyle = {
+  outlineStyle: "solid",
+  outlineWidth: 2,
+  outlineColor: "#2563eb", // blue-600
+  outlineOffset: 0,
+};
+const WEB_NO_OUTLINE: TextStyle = { outlineWidth: 0 };
 
 type AddressSearchProps = {
   onSearch: (address: string) => void;
@@ -10,6 +22,7 @@ type AddressSearchProps = {
 // Address input + search button at the top of the results screen.
 export function AddressSearch({ onSearch, loading }: AddressSearchProps) {
   const [value, setValue] = useState("");
+  const [focused, setFocused] = useState(false);
   const trimmed = value.trim();
 
   function submit() {
@@ -29,15 +42,27 @@ export function AddressSearch({ onSearch, loading }: AddressSearchProps) {
       <Text className="text-2xl font-bold text-neutral-900 dark:text-white">Property report</Text>
       <View className="flex-row gap-2">
         <TextInput
-          className="flex-1 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-4 py-3 text-base text-neutral-900 dark:text-white"
+          className={`flex-1 rounded-xl border bg-white dark:bg-neutral-900 px-4 py-3 text-base text-neutral-900 dark:text-white ${
+            focused
+              ? "border-blue-600 dark:border-blue-400"
+              : "border-neutral-300 dark:border-neutral-700"
+          }`}
+          style={IS_WEB ? (focused ? WEB_FOCUS_OUTLINE : WEB_NO_OUTLINE) : undefined}
           placeholder="Enter an address"
           placeholderTextColor="#9ca3af"
           value={value}
           onChangeText={setValue}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          // Enter / the keyboard's search key runs the search.
           onSubmitEditing={submit}
           returnKeyType="search"
-          autoCapitalize="words"
+          // Words on phones; on web, browsers' capitalize/autofill/spellcheck
+          // get in the way of typing an address.
+          autoCapitalize={IS_WEB ? "none" : "words"}
+          autoComplete="off"
           autoCorrect={false}
+          spellCheck={false}
         />
         <Pressable
           onPress={submit}

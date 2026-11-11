@@ -72,7 +72,7 @@ export default function ResultsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-50 dark:bg-black" edges={["top", "left", "right"]}>
-      <ScrollView contentContainerClassName="p-4 gap-4" keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerClassName="w-full max-w-[720px] self-center p-4 gap-4" keyboardShouldPersistTaps="handled">
         <AddressSearch onSearch={search} loading={screen.kind === "loading"} />
 
         {screen.kind === "idle" ? (
