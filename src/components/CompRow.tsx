@@ -1,9 +1,10 @@
 import { View, Text } from "react-native";
 import type { Comp } from "@/types";
-import { formatMoney, bedsBaths, formatDistance } from "@/format";
+import { formatMoney, bedsBaths, formatDistance, formatPricePerSqft } from "@/format";
 import { StatusBadge } from "./StatusBadge";
 
-export function CompRow({ comp }: { comp: Comp }) {
+// `monthly` marks a rent comp, whose $/sqft is a monthly rate shown with cents.
+export function CompRow({ comp, monthly = false }: { comp: Comp; monthly?: boolean }) {
   return (
     <View className="flex-row items-center justify-between py-3 border-b border-neutral-100 dark:border-neutral-800">
       <View className="flex-1 pr-3 gap-1">
@@ -17,9 +18,16 @@ export function CompRow({ comp }: { comp: Comp }) {
           <StatusBadge status={comp.status} />
         </View>
       </View>
-      <Text className="text-base font-semibold text-neutral-900 dark:text-white">
-        {formatMoney(comp.price)}
-      </Text>
+      <View className="items-end">
+        <Text className="text-base font-semibold text-neutral-900 dark:text-white">
+          {formatMoney(comp.price)}
+        </Text>
+        {comp.pricePerSqft !== undefined ? (
+          <Text className="text-xs text-neutral-500 dark:text-neutral-400">
+            {formatPricePerSqft(comp.pricePerSqft, { monthly })}
+          </Text>
+        ) : null}
+      </View>
     </View>
   );
 }

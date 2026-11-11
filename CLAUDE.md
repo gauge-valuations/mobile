@@ -51,9 +51,11 @@ repo/session — do not build it here.
    features, user accounts, maps, or alerts yet. If a change would add one of those, stop
    and flag it instead of building it.
 
-6. **`src/types.ts` is the contract, and the only copy of it.** Read it there. Do not
-   restate, duplicate, or re-derive the types anywhere else — extend them in place. The
-   backend returns exactly this shape. `src/types.ts` also holds `parsePropertyReport` and
+6. **`src/types.ts` is the contract and its source of truth.** Read it there. Do not
+   restate, duplicate, or re-derive the types anywhere else in this repo — extend them in
+   place. The backend returns exactly this shape and keeps a byte-for-byte copy
+   (`gauge-backend/lib/types.ts`) that must be re-copied after every change here. New
+   fields are optional so an older backend response still validates. `src/types.ts` also holds `parsePropertyReport` and
    its type guards, which validate incoming JSON at runtime. Any change to the types or the
    guards is a change to a shared contract and must be flagged, not made silently.
 
@@ -87,19 +89,27 @@ State is local to the screen; `searchIdRef` discards responses from superseded s
 
 Components in `src/components/`:
 
-1. `AddressSearch` — address input + search button.
-2. `PropertyFactsCard` — beds/baths/sqft/year built/lot/last sale.
-3. `ValuationCard` — estimated value, list price, potential margin (only when list price
-   exists).
-4. `CompsList` (+ `CompRow`, `StatusBadge`) — comps: price, beds/baths, distance, status.
-5. `RentCard` — monthly rent + rent comps.
+1. `AddressSearch` — address input + search button, plus "Try:" chips from
+   `src/sampleAddresses.ts` (`SAMPLE_ADDRESSES`) that fill the input and search.
+2. `PropertyFactsCard` — beds/baths/sqft/year built/lot/last sale. Year built and lot size
+   are optional and show "—" when missing.
+3. `ValuationCard` — estimated value with optional $/sqft, value range, and low-confidence
+   note; list price and potential margin only when list price exists, otherwise a
+   "Not currently listed" line.
+4. `CompsList` (+ `CompRow`, `StatusBadge`) — comps: price, optional $/sqft, beds/baths,
+   distance, status. `off_market` = inactive listing, not a confirmed sale (price is the
+   last asking price); badge "Off market", neutral gray.
+5. `RentCard` — monthly rent with optional rent $/sqft and range, plus rent comps.
 6. `MarketSnapshotStrip` — median price, avg days on market, ZIP.
 7. `Disclaimer` — "Estimates only — not an appraisal."
 8. `Card` — shared container.
 
-Also: `src/config.ts` (env → `API_BASE_URL`; empty string collapses to `undefined`),
-`src/api.ts` (`getPropertyReport`), `src/format.ts` (`formatMoney`, `formatSignedMoney`,
-`bedsBaths`), `src/global.css` (Tailwind entry).
+Also: `src/config.ts` (env → `API_BASE_URL` and `DEMO_KEY`; empty string collapses to
+`undefined`), `src/api.ts` (`getPropertyReport`; sends `X-Demo-Key` only when `DEMO_KEY` is
+set), `src/format.ts` (`formatMoney`, `formatSignedMoney`, `formatMoneyRange`,
+`formatPricePerSqft`, `bedsBaths`, …), `src/mockData.ts` (`MOCK_DATA`, plus
+`MOCK_DATA_UNLISTED` for checking the not-listed state; not wired in), `src/global.css`
+(Tailwind entry). `npm run build:web` exports the static web bundle to `dist/` (gitignored).
 
 ## Conventions
 
@@ -108,6 +118,8 @@ Also: `src/config.ts` (env → `API_BASE_URL`; empty string collapses to `undefi
 - Components in `src/components/`; screens under Expo Router routes in `src/app/`.
 - Money formatting: use `src/format.ts`. Whole dollars with thousands separators
   (e.g. `$412,000`), no cents. Do not write ad-hoc formatting in components.
+  One exception: per-sqft *rent* rates keep cents (`formatPricePerSqft(v, { monthly: true })`
+  → `$2.84/sqft/mo`); sale $/sqft stays whole dollars (`$702/sqft`).
 
 ## Definition of done
 

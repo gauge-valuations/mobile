@@ -1,17 +1,33 @@
 import { View, Text } from "react-native";
 import type { RentEstimate } from "@/types";
-import { formatMoney } from "@/format";
+import { formatMoney, formatMoneyRange, formatPricePerSqft } from "@/format";
 import { Card } from "./Card";
 import { CompRow } from "./CompRow";
 
 export function RentCard({ rent }: { rent: RentEstimate }) {
+  const { rentPerSqft, rentRangeLow, rentRangeHigh } = rent;
+  // A range needs both ends; one alone is not shown.
+  const showRange = rentRangeLow !== undefined && rentRangeHigh !== undefined;
+
   return (
     <Card title="Rent estimate">
-      <View className="flex-row items-baseline gap-1">
-        <Text className="text-3xl font-bold text-neutral-900 dark:text-white">
-          {formatMoney(rent.monthlyRent)}
-        </Text>
-        <Text className="text-sm text-neutral-500 dark:text-neutral-400">/ month</Text>
+      <View className="gap-1">
+        <View className="flex-row items-baseline gap-1">
+          <Text className="text-3xl font-bold text-neutral-900 dark:text-white">
+            {formatMoney(rent.monthlyRent)}
+          </Text>
+          <Text className="text-sm text-neutral-500 dark:text-neutral-400">/ month</Text>
+        </View>
+        {rentPerSqft !== undefined ? (
+          <Text className="text-sm text-neutral-500 dark:text-neutral-400">
+            {formatPricePerSqft(rentPerSqft, { monthly: true })}
+          </Text>
+        ) : null}
+        {showRange ? (
+          <Text className="text-sm text-neutral-500 dark:text-neutral-400">
+            Range: {formatMoneyRange(rentRangeLow, rentRangeHigh)} / month
+          </Text>
+        ) : null}
       </View>
 
       {rent.rentComps.length > 0 ? (
@@ -20,7 +36,7 @@ export function RentCard({ rent }: { rent: RentEstimate }) {
             Rent comps
           </Text>
           {rent.rentComps.map((comp, i) => (
-            <CompRow key={`${comp.address}-${i}`} comp={comp} />
+            <CompRow key={`${comp.address}-${i}`} comp={comp} monthly />
           ))}
         </View>
       ) : null}

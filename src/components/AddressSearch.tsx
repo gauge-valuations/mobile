@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { View, TextInput, Pressable, Text } from "react-native";
+import { SAMPLE_ADDRESSES } from "@/sampleAddresses";
 
 type AddressSearchProps = {
   onSearch: (address: string) => void;
@@ -15,6 +16,12 @@ export function AddressSearch({ onSearch, loading }: AddressSearchProps) {
     if (trimmed.length > 0 && !loading) {
       onSearch(trimmed);
     }
+  }
+
+  function pickSample(address: string) {
+    if (loading) return;
+    setValue(address);
+    onSearch(address);
   }
 
   return (
@@ -41,6 +48,24 @@ export function AddressSearch({ onSearch, loading }: AddressSearchProps) {
         >
           <Text className="text-base font-semibold text-white">Search</Text>
         </Pressable>
+      </View>
+
+      {/* Sample addresses: tap to fill the input and search. flex-wrap keeps the
+          chips on screen at narrow phone widths. */}
+      <View className="flex-row flex-wrap items-center gap-2">
+        <Text className="text-xs text-neutral-500 dark:text-neutral-400">Try:</Text>
+        {SAMPLE_ADDRESSES.map((address) => (
+          <Pressable
+            key={address}
+            onPress={() => pickSample(address)}
+            disabled={loading}
+            accessibilityRole="button"
+            accessibilityLabel={`Search ${address}`}
+            className="rounded-full border border-neutral-200 dark:border-neutral-800 px-3 py-1"
+          >
+            <Text className="text-xs text-neutral-600 dark:text-neutral-400">{address}</Text>
+          </Pressable>
+        ))}
       </View>
     </View>
   );

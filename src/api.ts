@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "./config";
+import { API_BASE_URL, DEMO_KEY } from "./config";
 import { MOCK_DATA } from "./mockData";
 import { parsePropertyReport, type PropertyReport } from "./types";
 
@@ -67,6 +67,8 @@ export async function getPropertyReport(address: string): Promise<PropertyReport
     try {
       res = await fetch(`${API_BASE_URL}/api/property?address=${encodeURIComponent(address)}`, {
         signal: controller.signal,
+        // Demo gate only; not a secret (see config.ts). Omitted when unset.
+        headers: DEMO_KEY !== undefined ? { "X-Demo-Key": DEMO_KEY } : undefined,
       });
     } catch {
       throw timedOut

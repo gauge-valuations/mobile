@@ -54,3 +54,16 @@ export function formatDaysOnMarket(days: number): string {
 export function formatSqft(value: number): string {
   return Math.round(value).toLocaleString("en-US");
 }
+
+// Price per square foot. Sale values are whole dollars ("$702/sqft"). Monthly rent
+// rates are small, so they keep cents and say so ("$2.84/sqft/mo") — the one
+// exception to whole-dollar money. See CLAUDE.md "Conventions".
+export function formatPricePerSqft(value: number, options: { monthly?: boolean } = {}): string {
+  if (options.monthly) return `$${value.toFixed(2)}/sqft/mo`;
+  return `${formatMoney(value)}/sqft`;
+}
+
+// A value or rent range in whole dollars, e.g. "$602,000 to $648,000".
+export function formatMoneyRange(low: number, high: number): string {
+  return `${formatMoney(low)} to ${formatMoney(high)}`;
+}

@@ -25,3 +25,12 @@
 const raw = process.env.EXPO_PUBLIC_API_BASE_URL?.trim().replace(/\/+$/, "");
 
 export const API_BASE_URL: string | undefined = raw || undefined;
+
+// Demo gate (CLAUDE.md rule #2, narrow exception). Sent as the X-Demo-Key header
+// on requests to OUR backend. This value SHIPS IN THE BUNDLE and anyone can
+// extract it: it is a speed bump to protect request quota, NOT a secret. It must
+// never be a Rentcast or any other data-provider key. Same normalization as the
+// base URL: trimmed, and blank collapses to undefined (no header sent).
+const rawDemoKey = process.env.EXPO_PUBLIC_DEMO_KEY?.trim();
+
+export const DEMO_KEY: string | undefined = rawDemoKey || undefined;

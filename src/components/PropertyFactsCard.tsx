@@ -28,8 +28,16 @@ export function PropertyFactsCard({ property }: { property: Property }) {
         <Fact label="Beds" value={String(property.beds)} />
         <Fact label="Baths" value={String(property.baths)} />
         <Fact label="Sqft" value={formatSqft(property.sqft)} />
-        <Fact label="Year built" value={String(property.yearBuilt)} />
-        <Fact label="Lot size" value={`${formatSqft(property.lotSizeSqft)} sqft`} />
+        <Fact
+          label="Year built"
+          value={property.yearBuilt !== undefined ? String(property.yearBuilt) : "—"}
+        />
+        <Fact
+          label="Lot size"
+          value={
+            property.lotSizeSqft !== undefined ? `${formatSqft(property.lotSizeSqft)} sqft` : "—"
+          }
+        />
         <Fact label="Last sale" value={lastSale} />
       </View>
     </Card>
