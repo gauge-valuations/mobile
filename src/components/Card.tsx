@@ -12,7 +12,11 @@ export function Card({ title, children }: CardProps) {
   return (
     <View className="rounded-[18px] bg-card border border-rule p-5 gap-4">
       {title ? (
-        <Text className="font-mono-medium font-medium text-[11px] leading-4 uppercase tracking-widest text-muted">
+        <Text
+          role="heading"
+          aria-level={2}
+          className="font-mono-medium font-medium text-[11px] leading-4 uppercase tracking-widest text-muted"
+        >
           {title}
         </Text>
       ) : null}

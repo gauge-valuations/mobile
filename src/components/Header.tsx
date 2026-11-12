@@ -10,7 +10,9 @@ export function Header() {
       <View className="w-full max-w-[720px] self-center h-14 flex-row items-center justify-between px-4">
         <View className="flex-row items-center gap-2">
           <LogoMark />
-          <Text accessibilityRole="header" className="font-serif text-2xl text-ink">
+          {/* Brand wordmark, not a heading: the page's h1 is the hero headline or
+              "Property report". */}
+          <Text className="font-serif text-2xl text-ink">
             Gauge
           </Text>
         </View>

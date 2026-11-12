@@ -1,10 +1,7 @@
-import { useState } from "react";
-import { Platform, Pressable, type ViewStyle } from "react-native";
+import { Pressable } from "react-native";
 import Svg, { Circle, Line, Path } from "react-native-svg";
 import { useTheme, type ThemePreference } from "@/theme/ThemeProvider";
 import { useTokens } from "@/theme/tokens";
-
-const IS_WEB = Platform.OS === "web";
 
 // Each tap moves to the next choice: system -> light -> dark -> system.
 const NEXT: Record<ThemePreference, ThemePreference> = {
@@ -64,30 +61,19 @@ function ThemeIcon({ preference, color }: { preference: ThemePreference; color: 
   );
 }
 
-// Theme choice button for the header: a 40px tap target with a visible accent focus
-// ring on web (keyboard focus), labelled with the current choice and the next one.
+// Theme choice button for the header: a 40px tap target, labelled with the current
+// choice and the next one. The web focus ring comes from the shared rule in +html.tsx.
 export function ThemeToggle() {
   const { preference, setPreference } = useTheme();
   const tokens = useTokens();
-  const [focused, setFocused] = useState(false);
   const next = NEXT[preference];
-
-  const focusRing: ViewStyle | undefined =
-    IS_WEB && focused
-      ? ({ outlineStyle: "solid", outlineWidth: 2, outlineColor: tokens.accent, outlineOffset: 2 } as ViewStyle)
-      : IS_WEB
-        ? ({ outlineWidth: 0 } as ViewStyle)
-        : undefined;
 
   return (
     <Pressable
       onPress={() => setPreference(next)}
-      onFocus={() => setFocused(true)}
-      onBlur={() => setFocused(false)}
       accessibilityRole="button"
       accessibilityLabel={`Theme: ${LABEL[preference]}. Switch to ${LABEL[next]}.`}
       className="h-10 w-10 items-center justify-center rounded-lg active:bg-paper-deep"
-      style={focusRing}
     >
       <ThemeIcon preference={preference} color={tokens.ink} />
     </Pressable>

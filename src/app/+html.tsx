@@ -21,6 +21,16 @@ const backgroundCss = `
 html, body, #root { background-color: rgb(var(--color-paper)); color: rgb(var(--color-ink)); }
 `;
 
+// Keyboard focus ring for every button-like control (Search, Try chips, Show all, the
+// theme toggle, Retry): 2px in the accent token. :focus-visible keeps it off for mouse
+// and touch. The address input draws its own accent ring in AddressSearch.tsx.
+const focusCss = `
+[role="button"]:focus-visible, button:focus-visible, a:focus-visible {
+  outline: 2px solid rgb(var(--color-accent));
+  outline-offset: 2px;
+}
+`;
+
 // Runs before first paint: applies the saved theme choice (or the device setting) so
 // a reload shows the right theme at once. Mirrors ThemeProvider.tsx; storage access is
 // guarded so blocked storage falls back to the device setting.
@@ -51,12 +61,16 @@ export default function Root({ children }: PropsWithChildren) {
         />
         <meta name="theme-color" media="(prefers-color-scheme: light)" content={LIGHT_BG} />
         <meta name="theme-color" media="(prefers-color-scheme: dark)" content={DARK_BG} />
+        {/* Gauge's mark as an SVG icon (public/favicon.svg). Browsers without SVG icon
+            support use the PNG that app.json's web.favicon adds. */}
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="stylesheet" href={FONTS_HREF} />
         {/* Keeps the root ScrollView doing the scrolling, as on native. */}
         <ScrollViewStyleReset />
         <style dangerouslySetInnerHTML={{ __html: backgroundCss }} />
+        <style dangerouslySetInnerHTML={{ __html: focusCss }} />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body>{children}</body>

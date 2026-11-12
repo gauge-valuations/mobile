@@ -13,7 +13,8 @@ export function IdleHero() {
         HOME VALUE, IN ONE SCREEN
       </Text>
       <Text
-        accessibilityRole="header"
+        role="heading"
+        aria-level={1}
         className="font-serif text-ink text-[40px] leading-[42px] tracking-[-0.8px] md:text-[64px] md:leading-[67px] md:tracking-[-1.28px]"
         style={BALANCE}
       >

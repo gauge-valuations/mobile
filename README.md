@@ -9,17 +9,25 @@ The two sample addresses under the search box always load. Try one first.
 
 ## What the screen shows
 
+Before a search, the screen opens on a short intro: a serif headline, one line on what the report covers, the search box and the two sample addresses. A header with the Gauge mark stays at the top, with a theme toggle that cycles system, light and dark. The web version remembers the choice; the native apps keep it for the session.
+
+While a report loads, grey placeholder blocks in the shape of the first cards stand in for it. They pulse gently. When the report arrives, its sections fade in and rise slightly, one after another. Both effects are skipped when the device asks for reduced motion.
+
 For an address, the report shows:
 
 - **Property facts.** Beds, baths, square footage, year built, lot size and last sale. Missing fields show "—".
-- **Estimated value**, with price per square foot and a value range. If the estimate rests on few comparable homes, the card says so.
-- **Potential margin vs. list price.** This is the estimated value minus the list price. The client works it out and shows it only when the home has a list price. For a home with no active listing, the card shows "No current list price, so no potential margin." This is not equity: the app cannot know what is owed on a property.
+- **Estimated value**, as a large headline number with price per square foot. Below it, a range bar shows the low and high ends of the value range, a marker for the estimate and, when the home is listed, a second marker for the list price. If the estimate rests on few comparable homes, the card says so.
+- **Potential margin vs. list price.** This is the estimated value minus the list price, shown as a signed amount in a green or red pill. The client works it out and shows it only when the home has a list price. For a home with no active listing, the card shows "No current list price, so no potential margin." It is not value minus what is owed: the app cannot know that from an address.
 - **Comparable homes**, with price, price per square foot, beds and baths, distance and status. Comp prices are asking prices. Off-market comps are inactive listings marked "Off market", and their price is the last asking price, not a sale price. Lists longer than 5 rows collapse behind a "Show all" toggle.
 - **Rent estimate.** Monthly rent with rent per square foot, a range, and rent comps.
 - **Market snapshot.** Median price, average days on market and ZIP.
 - **Disclaimer.** "Estimates only — not an appraisal." It is shown on every report.
 
+If a lookup fails, a tinted card takes the report's place with a short label and the message for that kind of failure (see the table under Architecture). Address problems and the demo limit use an amber tint; server, connection and timeout problems use a red one. A Retry button appears only where a second attempt could help.
+
 The numbers come from the backend's own valuation engine, not straight from the data provider. The backend recomputes the estimate from comparable homes. It takes each comp's price per square foot, drops outliers, and weights the rest by how similar the provider scores each comp to the home. It then multiplies the weighted median by the home's square footage. If fewer than three usable comps remain, it falls back to the provider's own estimate and marks it low confidence. The full method is in the [backend README](https://github.com/gauge-valuations/backend#how-the-valuation-works).
+
+**Tech stack:** Expo (React Native), TypeScript, Expo Router, NativeWind, react-native-svg, react-native-reanimated.
 
 ## Architecture
 
@@ -94,8 +102,9 @@ npm run build:web  # expo export --platform web --output-dir dist (static web bu
 **Built and live:**
 
 - Web app deployed at https://gauge-valuations.vercel.app, connected to the live backend.
-- The single buyer report screen, with idle, loading, error and done states.
-- Property facts, estimated value with price per square foot, range and a low-confidence note.
+- The single buyer report screen, with an intro screen before the first search, placeholder blocks while loading, tinted error cards, and the report.
+- Light and dark themes with a toggle (system, light, dark), remembered on the web.
+- Property facts, estimated value with price per square foot, a value range bar and a low-confidence note.
 - Potential margin vs. list price, worked out on the client when a list price exists.
 - Comparable homes with off-market comps marked and a "Show all" toggle.
 - Rent estimate with rent per square foot, range and rent comps.
@@ -107,7 +116,7 @@ npm run build:web  # expo export --platform web --output-dir dist (static web bu
 - Comp prices are asking prices, not sale prices. Texas does not disclose sale prices, and off-market comps show their last asking price.
 - The demo runs on a free-tier data plan with a monthly limit. Once that limit is reached, only the two sample addresses are guaranteed to load.
 - Real data requires the backend. Without a base URL the app shows mock data.
-- The iOS and Android builds share the same code but are less verified than the web build.
+- The iOS and Android builds share the same code but have not been verified against the live backend. The web version is the verified target.
 
 **Planned, not built:**
 
@@ -125,6 +134,7 @@ src/
     +html.tsx          static web document head (web export only)
     index.tsx          the report screen and its four states
   components/          cards and rows (ValuationCard, CompsList, RentCard, ...)
+  theme/               design tokens, theme choice (ThemeProvider) and native font loading
   api.ts               getPropertyReport: fetch, timeout, failure kinds
   types.ts             PropertyReport contract and parsePropertyReport
   config.ts            reads the EXPO_PUBLIC_* variables

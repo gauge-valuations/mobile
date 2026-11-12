@@ -97,7 +97,8 @@ monthly lookup limit is reached; keep the list in sync with the backend.
 
 `src/app/index.tsx` renders the full buyer report and handles idle / loading / error / done.
 State is local to the screen; `searchIdRef` discards responses from superseded searches.
-`Header` sits fixed above the ScrollView. In the idle state `IdleHero` renders above
+Loading shows `ReportSkeleton`; errors show `ErrorCard`; a report's six sections are each
+wrapped in `Reveal`. `Header` sits fixed above the ScrollView. In the idle state `IdleHero` renders above
 `AddressSearch`; its slot stays in the tree (null when not idle) so `AddressSearch` is never
 remounted and keeps the typed address.
 
@@ -156,6 +157,31 @@ Components in `src/components/`:
     price, pads it by 8% of the span on each side, clamps to 0–100, and puts everything at
     50% when the span is zero. The bar is one `accessibilityRole="image"` element whose
     label states the real values.
+14. `ReportSkeleton` (+ `SkeletonBlock`) — loading placeholder shaped like the facts,
+    valuation and comps cards, built on the real `Card`. Blocks are `bg-muted/20` (visible on
+    the card color in both themes) and pulse (opacity 1 → 0.5 → 1, 1.4s); static with reduced
+    motion. One `role="progressbar"` labelled "Loading report", `aria-busy`.
+15. `ErrorCard` — the error state, under the search. Tone per `FetchFailureKind`: wait-tint
+    with a `border-wait/40` border for bad_address, not_found, quota; loss-tint with
+    `border-loss/40` for server, network, timeout, invalid. A mono label in the tone color
+    ("Check the address", "No data for this address", "Demo limit reached", "Server problem",
+    "Connection problem", "Took too long", "Something went wrong") and the unchanged
+    `FAILURE_COPY` message in ink form one `role="alert"`. Retry (only when `RETRYABLE`)
+    matches the Search button.
+16. `Reveal` — wraps one report section; fades it in and lifts it 16px on mount (see Motion).
+
+Motion: the report reveal is 350ms ease-out, opacity 0 → 1 and a 16px rise, staggered 80ms
+per section, once per arrival (it plays on mount, so Show all, theme changes and re-renders
+do not replay it). Built with Reanimated CSS animations, fill mode "backwards" and no
+opacity or transform on the wrapper's own style, so content at rest is always fully
+visible. Both the reveal and the skeleton pulse are off with reduced motion
+(`useReducedMotion`). No count-ups or bar animations.
+
+Accessibility: on web, every button-like control gets a 2px accent `:focus-visible` ring
+from the rule in `+html.tsx` (the address input draws its own). Tap targets are at least
+40px tall (Try chips use a 40px tap area around the compact pill). Headings: the idle
+headline, or "Property report" in the other states, is level 1; card titles are level 2;
+the "Gauge" wordmark is not a heading.
 
 Theme and design tokens:
 

@@ -44,7 +44,12 @@ export function AddressSearch({ onSearch, loading, showTitle }: AddressSearchPro
 
   return (
     <View className="gap-3">
-      {showTitle ? <Text className="font-serif text-2xl text-ink">Property report</Text> : null}
+      {/* The page's level-1 heading outside the idle state (IdleHero has it there). */}
+      {showTitle ? (
+        <Text role="heading" aria-level={1} className="font-serif text-2xl text-ink">
+          Property report
+        </Text>
+      ) : null}
       <View className="flex-row items-center gap-2">
         <TextInput
           className={`flex-1 h-10 rounded-[10px] border bg-card px-3 font-sans text-base text-ink ${
@@ -86,8 +91,9 @@ export function AddressSearch({ onSearch, loading, showTitle }: AddressSearchPro
       </View>
 
       {/* Sample addresses: tap to fill the input and search. flex-wrap keeps the
-          chips on screen at narrow phone widths. */}
-      <View className="flex-row flex-wrap items-center gap-2">
+          chips on screen at narrow phone widths. Each chip's tap area is 40px tall;
+          the pill inside keeps its compact look. */}
+      <View className="flex-row flex-wrap items-center gap-x-2">
         <Text className="font-mono text-xs uppercase tracking-widest text-muted">Try</Text>
         {SAMPLE_ADDRESSES.map((address) => (
           <Pressable
@@ -96,9 +102,11 @@ export function AddressSearch({ onSearch, loading, showTitle }: AddressSearchPro
             disabled={loading}
             accessibilityRole="button"
             accessibilityLabel={`Search ${address}`}
-            className="rounded-full border border-rule bg-card px-3 py-1.5"
+            className="min-h-[40px] justify-center rounded-full"
           >
-            <Text className="font-sans text-xs text-ink">{address}</Text>
+            <View className="rounded-full border border-rule bg-card px-3 py-1.5">
+              <Text className="font-sans text-xs text-ink">{address}</Text>
+            </View>
           </Pressable>
         ))}
       </View>
