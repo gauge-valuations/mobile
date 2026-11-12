@@ -4,7 +4,7 @@ import { Text } from "react-native";
 // See CLAUDE.md rule #4.
 export function Disclaimer() {
   return (
-    <Text className="text-xs text-center text-neutral-400 dark:text-neutral-500 px-4">
+    <Text className="font-sans text-xs text-center text-muted px-4">
       Estimates only — not an appraisal.
     </Text>
   );

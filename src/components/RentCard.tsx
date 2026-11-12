@@ -17,18 +17,18 @@ export function RentCard({ rent }: { rent: RentEstimate }) {
     <Card title="Rent estimate">
       <View className="gap-1">
         <View className="flex-row items-baseline gap-1">
-          <Text className="text-3xl font-bold text-neutral-900 dark:text-white">
+          <Text className="font-serif text-3xl text-ink">
             {formatMoney(rent.monthlyRent)}
           </Text>
-          <Text className="text-sm text-neutral-500 dark:text-neutral-400">/ month</Text>
+          <Text className="font-sans text-sm text-muted">/ month</Text>
         </View>
         {rentPerSqft !== undefined ? (
-          <Text className="text-sm text-neutral-500 dark:text-neutral-400">
+          <Text className="font-mono text-sm text-muted">
             {formatPricePerSqft(rentPerSqft, { monthly: true })}
           </Text>
         ) : null}
         {showRange ? (
-          <Text className="text-sm text-neutral-500 dark:text-neutral-400">
+          <Text className="font-sans text-sm text-muted">
             Range: {formatMoneyRange(rentRangeLow, rentRangeHigh)} / month
           </Text>
         ) : null}
@@ -36,7 +36,7 @@ export function RentCard({ rent }: { rent: RentEstimate }) {
 
       {rent.rentComps.length > 0 ? (
         <View>
-          <Text className="text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400 pt-1">
+          <Text className="font-mono-medium font-medium text-xs uppercase tracking-wide text-muted pt-1">
             Rent comps
           </Text>
           {shownComps.map((comp, i) => (

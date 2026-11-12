@@ -1,28 +1,31 @@
 import { useState } from "react";
 import { View, TextInput, Pressable, Text, Platform, type TextStyle } from "react-native";
 import { SAMPLE_ADDRESSES } from "@/sampleAddresses";
+import { useTokens } from "@/theme/tokens";
 
 const IS_WEB = Platform.OS === "web";
 
-// Web focus ring: a 2px outline in the same blue as the focused border, in place
-// of the browser's default ring. Native has no outline; the border alone shows focus.
-const WEB_FOCUS_OUTLINE: TextStyle = {
-  outlineStyle: "solid",
-  outlineWidth: 2,
-  outlineColor: "#2563eb", // blue-600
-  outlineOffset: 0,
-};
+// Web focus ring: a 2px outline in the accent, the same color as the focused border,
+// in place of the browser's default ring. Native has no outline; the border alone
+// shows focus.
+function webFocusOutline(color: string): TextStyle {
+  return { outlineStyle: "solid", outlineWidth: 2, outlineColor: color, outlineOffset: 0 };
+}
 const WEB_NO_OUTLINE: TextStyle = { outlineWidth: 0 };
 
 type AddressSearchProps = {
   onSearch: (address: string) => void;
   loading: boolean;
+  // The "Property report" heading. Hidden in the idle state, where IdleHero's
+  // headline sits above the search instead.
+  showTitle: boolean;
 };
 
 // Address input + search button at the top of the results screen.
-export function AddressSearch({ onSearch, loading }: AddressSearchProps) {
+export function AddressSearch({ onSearch, loading, showTitle }: AddressSearchProps) {
   const [value, setValue] = useState("");
   const [focused, setFocused] = useState(false);
+  const tokens = useTokens();
   const trimmed = value.trim();
 
   function submit() {
@@ -37,19 +40,19 @@ export function AddressSearch({ onSearch, loading }: AddressSearchProps) {
     onSearch(address);
   }
 
+  const disabled = loading || trimmed.length === 0;
+
   return (
-    <View className="gap-2">
-      <Text className="text-2xl font-bold text-neutral-900 dark:text-white">Property report</Text>
-      <View className="flex-row gap-2">
+    <View className="gap-3">
+      {showTitle ? <Text className="font-serif text-2xl text-ink">Property report</Text> : null}
+      <View className="flex-row items-center gap-2">
         <TextInput
-          className={`flex-1 rounded-xl border bg-white dark:bg-neutral-900 px-4 py-3 text-base text-neutral-900 dark:text-white ${
-            focused
-              ? "border-blue-600 dark:border-blue-400"
-              : "border-neutral-300 dark:border-neutral-700"
+          className={`flex-1 h-10 rounded-[10px] border bg-card px-3 font-sans text-base text-ink ${
+            focused ? "border-accent" : "border-rule"
           }`}
-          style={IS_WEB ? (focused ? WEB_FOCUS_OUTLINE : WEB_NO_OUTLINE) : undefined}
+          style={IS_WEB ? (focused ? webFocusOutline(tokens.accent) : WEB_NO_OUTLINE) : undefined}
           placeholder="Enter an address"
-          placeholderTextColor="#9ca3af"
+          placeholderTextColor={tokens.muted}
           value={value}
           onChangeText={setValue}
           onFocus={() => setFocused(true)}
@@ -66,19 +69,26 @@ export function AddressSearch({ onSearch, loading }: AddressSearchProps) {
         />
         <Pressable
           onPress={submit}
-          disabled={loading || trimmed.length === 0}
-          className={`items-center justify-center rounded-xl px-5 ${
-            loading || trimmed.length === 0 ? "bg-neutral-300 dark:bg-neutral-700" : "bg-blue-600"
+          disabled={disabled}
+          accessibilityRole="button"
+          className={`h-10 items-center justify-center rounded-lg px-4 ${
+            disabled ? "bg-rule" : "bg-ink"
           }`}
         >
-          <Text className="text-base font-semibold text-white">Search</Text>
+          <Text
+            className={`font-sans-medium font-medium text-sm ${
+              disabled ? "text-muted" : "text-paper"
+            }`}
+          >
+            Search
+          </Text>
         </Pressable>
       </View>
 
       {/* Sample addresses: tap to fill the input and search. flex-wrap keeps the
           chips on screen at narrow phone widths. */}
       <View className="flex-row flex-wrap items-center gap-2">
-        <Text className="text-xs text-neutral-500 dark:text-neutral-400">Try:</Text>
+        <Text className="font-mono text-xs uppercase tracking-widest text-muted">Try</Text>
         {SAMPLE_ADDRESSES.map((address) => (
           <Pressable
             key={address}
@@ -86,9 +96,9 @@ export function AddressSearch({ onSearch, loading }: AddressSearchProps) {
             disabled={loading}
             accessibilityRole="button"
             accessibilityLabel={`Search ${address}`}
-            className="rounded-full border border-neutral-200 dark:border-neutral-800 px-3 py-1"
+            className="rounded-full border border-rule bg-card px-3 py-1.5"
           >
-            <Text className="text-xs text-neutral-600 dark:text-neutral-400">{address}</Text>
+            <Text className="font-sans text-xs text-ink">{address}</Text>
           </Pressable>
         ))}
       </View>

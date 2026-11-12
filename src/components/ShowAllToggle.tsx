@@ -15,7 +15,7 @@ export function ShowAllToggle({ total, expanded, onToggle }: ShowAllToggleProps)
   if (total <= COLLAPSED_ROW_COUNT) return null;
   return (
     <Pressable onPress={onToggle} accessibilityRole="button" className="self-start pt-2">
-      <Text className="text-sm font-semibold text-blue-600 dark:text-blue-400">
+      <Text className="font-sans-medium font-medium text-sm text-accent">
         {expanded ? "Show fewer" : `Show all ${total}`}
       </Text>
     </Pressable>

@@ -27,22 +27,22 @@ export function ValuationCard({ valuation }: { valuation: Valuation }) {
   return (
     <Card title="Valuation">
       <View className="gap-1">
-        <Text className="text-xs text-neutral-500 dark:text-neutral-400">Estimated value</Text>
-        <Text className="text-3xl font-bold text-neutral-900 dark:text-white">
+        <Text className="font-sans text-xs text-muted">Estimated value</Text>
+        <Text className="font-serif text-3xl text-ink">
           {formatMoney(estimatedValue)}
         </Text>
         {pricePerSqft !== undefined ? (
-          <Text className="text-sm text-neutral-500 dark:text-neutral-400">
+          <Text className="font-mono text-sm text-muted">
             {formatPricePerSqft(pricePerSqft)}
           </Text>
         ) : null}
         {showRange ? (
-          <Text className="text-sm text-neutral-500 dark:text-neutral-400">
+          <Text className="font-sans text-sm text-muted">
             Range: {formatMoneyRange(valueRangeLow, valueRangeHigh)}
           </Text>
         ) : null}
         {lowConfidence === true ? (
-          <Text className="text-sm text-amber-700 dark:text-amber-300">
+          <Text className="font-sans text-sm text-wait">
             Low confidence: few comparable homes.
           </Text>
         ) : null}
@@ -50,26 +50,24 @@ export function ValuationCard({ valuation }: { valuation: Valuation }) {
 
       {listPrice !== undefined ? (
         <View className="flex-row justify-between">
-          <Text className="text-sm text-neutral-500 dark:text-neutral-400">List price</Text>
-          <Text className="text-sm font-medium text-neutral-900 dark:text-white">
+          <Text className="font-sans text-sm text-muted">List price</Text>
+          <Text className="font-mono-medium font-medium text-sm text-ink">
             {formatMoney(listPrice)}
           </Text>
         </View>
       ) : (
-        <Text className="text-sm text-neutral-500 dark:text-neutral-400">
+        <Text className="font-sans text-sm text-muted">
           No current list price, so no potential margin.
         </Text>
       )}
 
       {showMargin ? (
         <View className="flex-row justify-between">
-          <Text className="text-sm text-neutral-500 dark:text-neutral-400">
+          <Text className="font-sans text-sm text-muted">
             Potential margin vs. list price
           </Text>
           <Text
-            className={`text-sm font-semibold ${
-              positive ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
-            }`}
+            className={`font-mono-medium font-medium text-sm ${positive ? "text-gain" : "text-loss"}`}
           >
             {formatSignedMoney(margin as number)}
           </Text>

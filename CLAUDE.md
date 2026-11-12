@@ -97,11 +97,15 @@ monthly lookup limit is reached; keep the list in sync with the backend.
 
 `src/app/index.tsx` renders the full buyer report and handles idle / loading / error / done.
 State is local to the screen; `searchIdRef` discards responses from superseded searches.
+`Header` sits fixed above the ScrollView. In the idle state `IdleHero` renders above
+`AddressSearch`; its slot stays in the tree (null when not idle) so `AddressSearch` is never
+remounted and keeps the typed address.
 
 Components in `src/components/`:
 
-1. `AddressSearch` — address input + search button, plus "Try:" chips from
-   `src/sampleAddresses.ts` (`SAMPLE_ADDRESSES`) that fill the input and search.
+1. `AddressSearch` — address input + search button (ink background, paper text), plus
+   "Try" pill chips from `src/sampleAddresses.ts` (`SAMPLE_ADDRESSES`) that fill the input
+   and search. `showTitle` shows the "Property report" heading (hidden when idle).
 2. `PropertyFactsCard` — beds/baths/sqft/year built/lot/last sale. Year built and lot size
    are optional and show "—" when missing.
 3. `ValuationCard` — estimated value with optional $/sqft, value range, and low-confidence
@@ -115,6 +119,34 @@ Components in `src/components/`:
 6. `MarketSnapshotStrip` — median price, avg days on market, ZIP.
 7. `Disclaimer` — "Estimates only — not an appraisal."
 8. `Card` — shared container.
+9. `Header` — fixed top bar in the 720px column: `LogoMark` + serif "Gauge" wordmark on the
+   left, `ThemeToggle` on the right.
+10. `LogoMark` — Gauge's own mark: 28px accent rounded square with a gauge arc and needle
+    in on-accent, drawn with react-native-svg.
+11. `ThemeToggle` — 40px button cycling system → light → dark; SVG icon shows the current
+    choice; accent focus ring on web.
+12. `IdleHero` — idle-state label, serif headline and lead line.
+
+Theme and design tokens:
+
+- Tokens (paper, paper-deep, card, rule, ink, muted, accent, accent-tint, on-accent, gain,
+  gain-tint, loss, loss-tint, wait, wait-tint) are Tailwind colors in `tailwind.config.js`
+  that read CSS variables from `src/global.css` (`:root` = light, `.dark:root` = dark).
+  Use the token classes; do not add `dark:` variants or raw palette colors.
+  `src/theme/tokens.ts` holds the same values as hex (`TOKENS`, `useTokens()`) only for
+  props that take a color value (placeholder, ActivityIndicator, SVG, web outline). Keep
+  the two in sync.
+- `darkMode: "class"`. `src/theme/ThemeProvider.tsx` (`useTheme()`) holds the choice
+  (system / light / dark) and applies it through NativeWind's `setColorScheme`. Web saves
+  it in localStorage (key in `src/theme/storageKey.ts`) and a pre-paint script in
+  `+html.tsx` sets the `.dark` class before first paint; native keeps it in memory for the
+  session (no storage package installed).
+- Fonts: `font-serif` (Newsreader 400), `font-sans` / `font-sans-medium` (Geist 400/500),
+  `font-mono` / `font-mono-medium` (Geist Mono 400/500). Each family stack starts with the
+  native family name, which browsers skip. Native loads them from `@expo-google-fonts/*`
+  via `src/theme/fonts.native.ts` in `_layout.tsx` (splash held until loaded or failed);
+  web loads them from Google Fonts in `+html.tsx`. Only 400 and 500 exist: pair the
+  `-medium` classes with `font-medium`, and do not use `font-semibold` / `font-bold`.
 
 Also: `src/config.ts` (env → `API_BASE_URL` and `DEMO_KEY`; empty string collapses to
 `undefined`), `src/api.ts` (`getPropertyReport`; sends `X-Demo-Key` only when `DEMO_KEY` is

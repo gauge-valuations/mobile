@@ -11,6 +11,9 @@ import { CompsList } from "@/components/CompsList";
 import { RentCard } from "@/components/RentCard";
 import { MarketSnapshotStrip } from "@/components/MarketSnapshotStrip";
 import { Disclaimer } from "@/components/Disclaimer";
+import { Header } from "@/components/Header";
+import { IdleHero } from "@/components/IdleHero";
+import { useTokens } from "@/theme/tokens";
 
 // What the screen is showing. A discriminated union rather than a flat status plus
 // parallel state, so "error with no reason" and "done with no report" are not
@@ -54,6 +57,7 @@ export default function ResultsScreen() {
   const [lastAddress, setLastAddress] = useState("");
   // Ignore responses from superseded searches so out-of-order fetches cannot overwrite newer results.
   const searchIdRef = useRef(0);
+  const tokens = useTokens();
 
   async function search(address: string) {
     const searchId = ++searchIdRef.current;
@@ -73,23 +77,24 @@ export default function ResultsScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-neutral-50 dark:bg-black" edges={["top", "left", "right"]}>
+    <SafeAreaView className="flex-1 bg-paper" edges={["top", "left", "right"]}>
+      {/* Fixed above the ScrollView, so it stays visible over a long report. */}
+      <Header />
       <ScrollView contentContainerClassName="w-full max-w-[720px] self-center p-4 gap-4" keyboardShouldPersistTaps="handled">
-        <AddressSearch onSearch={search} loading={screen.kind === "loading"} />
+        {/* The hero's slot stays in the tree (null when not idle) so AddressSearch keeps
+            its position and is not remounted, which would clear the typed address. */}
+        {screen.kind === "idle" ? <IdleHero /> : null}
 
-        {screen.kind === "idle" ? (
-          <View className="items-center py-16 px-6">
-            <Text className="text-base text-center text-neutral-500 dark:text-neutral-400">
-              Enter an address above to see property facts, an estimated value, comparable homes,
-              a rent estimate, and market context.
-            </Text>
-          </View>
-        ) : null}
+        <AddressSearch
+          onSearch={search}
+          loading={screen.kind === "loading"}
+          showTitle={screen.kind !== "idle"}
+        />
 
         {screen.kind === "loading" ? (
           <View className="items-center py-16 gap-3">
-            <ActivityIndicator />
-            <Text className="text-sm text-neutral-500 dark:text-neutral-400">
+            <ActivityIndicator color={tokens.accent} />
+            <Text className="font-sans text-sm text-muted">
               Fetching report…
             </Text>
           </View>
@@ -97,15 +102,15 @@ export default function ResultsScreen() {
 
         {screen.kind === "error" ? (
           <View className="items-center py-16 gap-3 px-6">
-            <Text className="text-base text-center text-neutral-700 dark:text-neutral-300">
+            <Text className="font-sans text-base text-center text-ink">
               {FAILURE_COPY[screen.failure]}
             </Text>
             {RETRYABLE[screen.failure] ? (
               <Pressable
                 onPress={() => search(lastAddress)}
-                className="rounded-xl bg-blue-600 px-5 py-3"
+                className="rounded-xl bg-accent px-5 py-3"
               >
-                <Text className="text-base font-semibold text-white">Retry</Text>
+                <Text className="font-sans-medium font-medium text-base text-on-accent">Retry</Text>
               </Pressable>
             ) : null}
           </View>

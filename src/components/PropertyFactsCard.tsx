@@ -6,8 +6,8 @@ import { Card } from "./Card";
 function Fact({ label, value }: { label: string; value: string }) {
   return (
     <View className="w-1/2 pb-3">
-      <Text className="text-xs text-neutral-500 dark:text-neutral-400">{label}</Text>
-      <Text className="text-base font-medium text-neutral-900 dark:text-white">{value}</Text>
+      <Text className="font-sans text-xs text-muted">{label}</Text>
+      <Text className="font-sans-medium font-medium text-base text-ink">{value}</Text>
     </View>
   );
 }
@@ -21,7 +21,7 @@ export function PropertyFactsCard({ property }: { property: Property }) {
 
   return (
     <Card title="Property facts">
-      <Text className="text-base font-medium text-neutral-900 dark:text-white">
+      <Text className="font-sans-medium font-medium text-base text-ink">
         {property.address}
       </Text>
       <View className="flex-row flex-wrap">

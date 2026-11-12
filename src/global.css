@@ -1,3 +1,42 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Design tokens as space-separated RGB channels, read by the named colors in
+   tailwind.config.js (rgb(var(--color-x) / <alpha-value>)). Classes stay the same
+   in both themes; only these values change.
+   Keep in sync with src/theme/tokens.ts, which holds the same values as hex for the
+   few props that take a color instead of a class. */
+:root {
+  --color-paper: 250 248 245; /* #faf8f5 */
+  --color-paper-deep: 241 236 230; /* #f1ece6 */
+  --color-card: 255 255 255; /* #ffffff */
+  --color-rule: 230 223 215; /* #e6dfd7 */
+  --color-ink: 17 17 17; /* #111111 */
+  --color-muted: 95 90 85; /* #5f5a55 */
+  --color-accent: 31 111 80; /* #1f6f50 */
+  --color-accent-tint: 220 239 229; /* #dcefe5 */
+  --color-on-accent: 255 255 255; /* #ffffff */
+  --color-loss: 200 30 30; /* #c81e1e */
+  --color-loss-tint: 254 226 226; /* #fee2e2 */
+  --color-wait: 143 92 22; /* #8f5c16 */
+  --color-wait-tint: 254 243 199; /* #fef3c7 */
+}
+
+/* Dark values. On web the .dark class on <html> selects them; on native NativeWind
+   maps this selector to the app's color scheme. Set by src/theme/ThemeProvider.tsx. */
+.dark:root {
+  --color-paper: 18 17 15; /* #12110f */
+  --color-paper-deep: 28 26 24; /* #1c1a18 */
+  --color-card: 28 26 24; /* #1c1a18 */
+  --color-rule: 42 39 36; /* #2a2724 */
+  --color-ink: 237 237 237; /* #ededed */
+  --color-muted: 138 133 128; /* #8a8580 */
+  --color-accent: 79 181 137; /* #4fb589 */
+  --color-accent-tint: 22 51 38; /* #163326 */
+  --color-on-accent: 18 17 15; /* #12110f */
+  --color-loss: 248 113 113; /* #f87171 */
+  --color-loss-tint: 58 23 23; /* #3a1717 */
+  --color-wait: 251 191 37; /* #fbbf25 */
+  --color-wait-tint: 58 42 12; /* #3a2a0c */
+}

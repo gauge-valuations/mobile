@@ -12,7 +12,7 @@ export function CompsList({ comps }: { comps: Comp[] }) {
   return (
     <Card title="Comparable homes">
       {comps.length === 0 ? (
-        <Text className="text-sm text-neutral-500 dark:text-neutral-400">
+        <Text className="font-sans text-sm text-muted">
           No comparable homes available.
         </Text>
       ) : (
