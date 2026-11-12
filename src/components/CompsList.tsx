@@ -18,7 +18,7 @@ export function CompsList({ comps }: { comps: Comp[] }) {
       ) : (
         <View>
           {shown.map((comp, i) => (
-            <CompRow key={`${comp.address}-${i}`} comp={comp} />
+            <CompRow key={`${comp.address}-${i}`} comp={comp} first={i === 0} />
           ))}
           <ShowAllToggle
             total={comps.length}

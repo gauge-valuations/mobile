@@ -67,3 +67,17 @@ export function formatPricePerSqft(value: number, options: { monthly?: boolean }
 export function formatMoneyRange(low: number, high: number): string {
   return `${formatMoney(low)} to ${formatMoney(high)}`;
 }
+
+// Compact money. Under $1,000: whole dollars. Thousands: at most one decimal ($602K,
+// $3.4K). Millions: up to maxMillionDecimals decimals, default 2 ($2.41M, $3.02M; "$3M"
+// only when it rounds to exactly 3). Trailing zeros are dropped. A value that rounds up
+// to 1000K is promoted to millions rather than printed as "$1000K".
+export function formatMoneyCompact(amount: number, maxMillionDecimals = 2): string {
+  const sign = amount < 0 ? "-" : "";
+  const abs = Math.abs(amount);
+  if (abs < 1000) return `${sign}${formatMoney(abs)}`;
+  const thousands = Math.round(abs / 100) / 10;
+  if (thousands < 1000) return `${sign}$${thousands}K`;
+  const factor = 10 ** maxMillionDecimals;
+  return `${sign}$${Math.round((abs / 1_000_000) * factor) / factor}M`;
+}

@@ -9,14 +9,15 @@ const LABELS: Record<Comp["status"], string> = {
 };
 
 // Tailwind can't compute class names dynamically, so map status -> full classes.
-// Sold is ink on paper-deep with a rule border: a real sale, but not colored like a
-// gain. off_market is deliberately the quietest (muted, no border): it is not a
-// sale, so it must not look like the "Sold" badge.
+// Every chip has a 1px border so heights match. Sold is ink on paper-deep with a rule
+// border: a real sale, but not colored like a gain. off_market is not a sale, so it is
+// the quietest: muted text, no fill and a dashed border in muted at 50% opacity, which
+// also keeps it visible in dark mode, where paper-deep and card are the same color.
 const STYLES: Record<Comp["status"], string> = {
-  for_sale: "bg-accent-tint border border-accent-tint",
-  sold: "bg-paper-deep border border-rule",
-  for_lease: "bg-wait-tint border border-wait-tint",
-  off_market: "bg-paper-deep border border-paper-deep",
+  for_sale: "bg-accent-tint border-accent-tint",
+  sold: "bg-paper-deep border-rule",
+  for_lease: "bg-wait-tint border-wait-tint",
+  off_market: "bg-transparent border-muted/50 border-dashed",
 };
 
 const TEXT_STYLES: Record<Comp["status"], string> = {
@@ -28,8 +29,10 @@ const TEXT_STYLES: Record<Comp["status"], string> = {
 
 export function StatusBadge({ status }: { status: Comp["status"] }) {
   return (
-    <View className={`rounded-full px-2 py-0.5 ${STYLES[status]}`}>
-      <Text className={`font-sans-medium font-medium text-xs ${TEXT_STYLES[status]}`}>{LABELS[status]}</Text>
+    <View className={`rounded-full border px-2 py-0.5 ${STYLES[status]}`}>
+      <Text className={`font-sans-medium font-medium text-xs leading-4 ${TEXT_STYLES[status]}`}>
+        {LABELS[status]}
+      </Text>
     </View>
   );
 }

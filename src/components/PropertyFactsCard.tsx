@@ -4,9 +4,12 @@ import { formatMoney, formatSaleDate, formatSqft } from "@/format";
 import { Card } from "./Card";
 
 function Fact({ label, value }: { label: string; value: string }) {
+  // Values may wrap (Last sale can take two lines at phone width).
   return (
-    <View className="w-1/2 pb-3">
-      <Text className="font-sans text-xs text-muted">{label}</Text>
+    <View className="w-1/2 gap-1 pb-4 pr-3">
+      <Text className="font-mono text-[11px] leading-4 uppercase tracking-wider text-muted">
+        {label}
+      </Text>
       <Text className="font-sans-medium font-medium text-base text-ink">{value}</Text>
     </View>
   );
@@ -21,10 +24,10 @@ export function PropertyFactsCard({ property }: { property: Property }) {
 
   return (
     <Card title="Property facts">
-      <Text className="font-sans-medium font-medium text-base text-ink">
+      <Text className="font-serif text-ink text-[24px] leading-[30px] tracking-[-0.24px]">
         {property.address}
       </Text>
-      <View className="flex-row flex-wrap">
+      <View className="flex-row flex-wrap -mb-4">
         <Fact label="Beds" value={String(property.beds)} />
         <Fact label="Baths" value={String(property.baths)} />
         <Fact label="Sqft" value={formatSqft(property.sqft)} />

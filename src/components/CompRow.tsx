@@ -3,27 +3,40 @@ import type { Comp } from "@/types";
 import { formatMoney, bedsBaths, formatDistance, formatPricePerSqft } from "@/format";
 import { StatusBadge } from "./StatusBadge";
 
-// `monthly` marks a rent comp, whose $/sqft is a monthly rate shown with cents.
-export function CompRow({ comp, monthly = false }: { comp: Comp; monthly?: boolean }) {
+type CompRowProps = {
+  comp: Comp;
+  // Marks a rent comp, whose $/sqft is a monthly rate shown with cents.
+  monthly?: boolean;
+  // The first row has no divider above it; every other row draws one, so there is
+  // never a divider after the last visible row.
+  first?: boolean;
+};
+
+export function CompRow({ comp, monthly = false, first = false }: CompRowProps) {
   return (
-    <View className="flex-row items-center justify-between py-3 border-b border-rule">
-      <View className="flex-1 pr-3 gap-1">
+    <View
+      className={`flex-row items-center justify-between gap-3 py-3 ${
+        first ? "" : "border-t border-rule"
+      }`}
+    >
+      <View className="flex-1 gap-1.5">
         <Text className="font-sans-medium font-medium text-sm text-ink" numberOfLines={1}>
           {comp.address}
         </Text>
-        <View className="flex-row items-center gap-2">
+        <View className="flex-row flex-wrap items-center gap-2">
           <Text className="font-sans text-xs text-muted">
             {bedsBaths(comp.beds, comp.baths)} · {formatDistance(comp.distanceMiles)}
           </Text>
           <StatusBadge status={comp.status} />
         </View>
       </View>
-      <View className="items-end">
-        <Text className="font-mono-medium font-medium text-base text-ink">
+      {/* Price column never shrinks or wraps; the address column gives way instead. */}
+      <View className="shrink-0 items-end gap-0.5">
+        <Text className="font-mono-medium font-medium text-sm text-ink" numberOfLines={1}>
           {formatMoney(comp.price)}
         </Text>
         {comp.pricePerSqft !== undefined ? (
-          <Text className="font-mono text-xs text-muted">
+          <Text className="font-mono text-xs text-muted" numberOfLines={1}>
             {formatPricePerSqft(comp.pricePerSqft, { monthly })}
           </Text>
         ) : null}

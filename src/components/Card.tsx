@@ -6,12 +6,13 @@ type CardProps = {
   children: ReactNode;
 };
 
-// Shared card wrapper used by every section of the results screen.
+// Shared card wrapper used by every section of the results screen: 18px radius, 1px
+// rule border, no shadow. The title is a small mono label (rendered uppercase).
 export function Card({ title, children }: CardProps) {
   return (
-    <View className="rounded-2xl bg-card border border-rule p-4 gap-3">
+    <View className="rounded-[18px] bg-card border border-rule p-5 gap-4">
       {title ? (
-        <Text className="font-mono-medium font-medium text-xs uppercase tracking-wide text-muted">
+        <Text className="font-mono-medium font-medium text-[11px] leading-4 uppercase tracking-widest text-muted">
           {title}
         </Text>
       ) : null}

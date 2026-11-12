@@ -106,19 +106,38 @@ Components in `src/components/`:
 1. `AddressSearch` — address input + search button (ink background, paper text), plus
    "Try" pill chips from `src/sampleAddresses.ts` (`SAMPLE_ADDRESSES`) that fill the input
    and search. `showTitle` shows the "Property report" heading (hidden when idle).
-2. `PropertyFactsCard` — beds/baths/sqft/year built/lot/last sale. Year built and lot size
-   are optional and show "—" when missing.
-3. `ValuationCard` — estimated value with optional $/sqft, value range, and low-confidence
-   note; list price and potential margin only when list price exists, otherwise the note
-   "No current list price, so no potential margin."
-4. `CompsList` (+ `CompRow`, `StatusBadge`) — comps: price, optional $/sqft, beds/baths,
-   distance, status. `off_market` = inactive listing, not a confirmed sale (price is the
-   last asking price); badge "Off market", neutral gray. Lists longer than 5 rows
-   collapse behind `ShowAllToggle` ("Show all N"), which `RentCard` also uses.
-5. `RentCard` — monthly rent with optional rent $/sqft and range, plus rent comps.
-6. `MarketSnapshotStrip` — median price, avg days on market, ZIP.
-7. `Disclaimer` — "Estimates only — not an appraisal."
-8. `Card` — shared container.
+2. `PropertyFactsCard` — label "PROPERTY FACTS", the address in serif 24px, then a
+   two-column grid of mono 11px uppercase labels over sans-medium values (beds/baths/sqft/
+   year built/lot/last sale). Year built and lot size are optional and show "—" when
+   missing; last sale may wrap.
+3. `ValuationCard` — the focal card. Reading order: "ESTIMATED VALUE" label, the value in
+   serif (48px, 64px from `md`; line height 53/70px, letter spacing -0.02em in px),
+   $/sqft in mono, `RangeBar` (only when both range ends exist), then the "List price" row
+   and a potential-margin pill (gain colors when zero or positive, loss when negative; the
+   sign is in the text). Without a list price: the note "No current list price, so no
+   potential margin." and no pill. The margin is derived on the client when the backend
+   omits it. Low confidence shows a wait-tint callout.
+4. `CompsList` (+ `CompRow`, `StatusBadge`) — one card; rows divided by 1px rule top
+   borders (`first` row has none, so nothing trails the last row). Address (one line,
+   ellipsis) and "beds/baths · distance" + status chip on the left; price and $/sqft in
+   mono on the right, never shrinking. Status chips all have a 1px border: for sale =
+   accent on accent-tint, sold = ink on paper-deep with rule border, for lease = wait on
+   wait-tint, off market = muted text, no fill, dashed border in muted at 50% opacity
+   (`border-muted/50`). `off_market` = inactive
+   listing, not a confirmed sale (price is the last asking price). Lists longer than 5 rows
+   collapse behind `ShowAllToggle` ("Show all N" / "Show fewer", accent text with an SVG
+   chevron, 40px min tap height), which `RentCard` also uses.
+5. `RentCard` — "RENT ESTIMATE": monthly rent in serif 36px with "/ month", rent $/sqft in
+   mono, the rent range as a compact `RangeBar` (whole-dollar end labels), and rent comps
+   under a mono "RENT COMPS" label.
+6. `MarketSnapshotStrip` — paper-deep strip (18px radius, no border), three stats split by
+   rule dividers: median price (compact, e.g. $585K, so it fits a third of a 360px screen),
+   avg days on market, ZIP, each in serif 28px over a mono 11px uppercase caption.
+   The median uses `formatMoneyCompact(value, 1)` (e.g. $1.3M).
+7. `Disclaimer` — "Estimates only — not an appraisal.", centered muted 12px under a 1px
+   rule line.
+8. `Card` — shared container: 18px radius, 1px rule border, card background, 20px
+   padding, no shadow; `title` renders as a mono 11px uppercase muted label.
 9. `Header` — fixed top bar in the 720px column: `LogoMark` + serif "Gauge" wordmark on the
    left, `ThemeToggle` on the right.
 10. `LogoMark` — Gauge's own mark: 28px accent rounded square with a gauge arc and needle
@@ -126,6 +145,17 @@ Components in `src/components/`:
 11. `ThemeToggle` — 40px button cycling system → light → dark; SVG icon shows the current
     choice; accent focus ring on web.
 12. `IdleHero` — idle-state label, serif headline and lead line.
+13. `RangeBar` — value or rent range built from plain Views with percentage positions
+    (same on web and native): rule track, accent-tint fill from low to high, accent
+    estimate marker, optional ink list-price marker, low/high end labels (format passed in:
+    `formatMoneyCompact` for value, `formatMoney` for rent), and a legend in the regular
+    size. The end labels sit under the fill ends (low starts at the fill's left edge, high
+    ends at its right edge) when the measured fill width fits both labels plus an 8px gap;
+    otherwise (narrow or zero-span fill, or before layout) they fall back to the bar's
+    outer edges, so they never overflow. `rangePositions` sets the domain to cover low, high, the estimate and the list
+    price, pads it by 8% of the span on each side, clamps to 0–100, and puts everything at
+    50% when the span is zero. The bar is one `accessibilityRole="image"` element whose
+    label states the real values.
 
 Theme and design tokens:
 
@@ -151,7 +181,8 @@ Theme and design tokens:
 Also: `src/config.ts` (env → `API_BASE_URL` and `DEMO_KEY`; empty string collapses to
 `undefined`), `src/api.ts` (`getPropertyReport`; sends `X-Demo-Key` only when `DEMO_KEY` is
 set), `src/format.ts` (`formatMoney`, `formatSignedMoney`, `formatMoneyRange`,
-`formatPricePerSqft`, `bedsBaths`, …), `src/mockData.ts` (`MOCK_DATA`, plus
+`formatMoneyCompact` — thousands with at most one decimal, millions with up to
+`maxMillionDecimals` (default 2, e.g. $2.41M), `formatPricePerSqft`, `bedsBaths`, …), `src/mockData.ts` (`MOCK_DATA`, plus
 `MOCK_DATA_UNLISTED` for checking the not-listed state; not wired in), `src/global.css`
 (Tailwind entry), `src/app/_layout.tsx` (root stack; sets the web page title via
 `expo-router/head`), `src/app/+html.tsx` (static web document head, web export only). `npm run build:web` exports the static web bundle to `dist/` (gitignored).
