@@ -1,5 +1,6 @@
 import { View, Text, Platform, type TextStyle } from "react-native";
 import Svg, { Circle, Line, Path } from "react-native-svg";
+import { HIDDEN_FROM_SCREEN_READERS } from "@/components/hiddenFromScreenReaders";
 import { Card } from "@/components/Card";
 import { RangeBar } from "@/components/RangeBar";
 import { MarginPill } from "@/components/MarginPill";
@@ -22,8 +23,7 @@ function ArcShape() {
       height="100%"
       viewBox="0 0 28 20"
       preserveAspectRatio="xMidYMin meet"
-      accessibilityElementsHidden
-      importantForAccessibility="no-hide-descendants"
+      {...HIDDEN_FROM_SCREEN_READERS}
     >
       <Path
         d="M3.5 17.5a10.5 10.5 0 0 1 21 0"

@@ -1,13 +1,6 @@
-import { Platform } from "react-native";
 import Svg, { Circle, Line, Path, Rect } from "react-native-svg";
 import { useTokens } from "@/theme/tokens";
-
-// Decorative: hidden from screen readers. Web gets aria-hidden on the <svg>; the native
-// props would be passed to the DOM as unknown attributes there.
-const HIDDEN_FROM_SCREEN_READERS =
-  Platform.OS === "web"
-    ? { "aria-hidden": true }
-    : { accessibilityElementsHidden: true, importantForAccessibility: "no-hide-descendants" as const };
+import { HIDDEN_FROM_SCREEN_READERS } from "./hiddenFromScreenReaders";
 
 // Gauge's own mark: an accent rounded square with a gauge arc (a semicircle) and a
 // small needle drawn in the on-accent color. Decorative; the wordmark beside it

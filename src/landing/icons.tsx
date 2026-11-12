@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import Svg, { Circle, Line, Path, Rect } from "react-native-svg";
+import { HIDDEN_FROM_SCREEN_READERS } from "@/components/hiddenFromScreenReaders";
 
 // Small line icons for the landing sections, drawn on a 24-unit grid. Decorative: the
 // headline beside each one carries the meaning.
@@ -12,8 +13,7 @@ function Frame({ size = 28, children }: { size?: number; children: ReactNode }) 
       height={size}
       viewBox="0 0 24 24"
       fill="none"
-      accessibilityElementsHidden
-      importantForAccessibility="no-hide-descendants"
+      {...HIDDEN_FROM_SCREEN_READERS}
     >
       {children}
     </Svg>
