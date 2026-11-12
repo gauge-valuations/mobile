@@ -1,7 +1,6 @@
 import { View, Text } from "react-native";
-import Svg, { Circle, Line, Path } from "react-native-svg";
+import Svg, { Circle, Defs, Line, LinearGradient, Path, RadialGradient, Stop } from "react-native-svg";
 import { HIDDEN_FROM_SCREEN_READERS } from "@/components/hiddenFromScreenReaders";
-import { Card } from "@/components/Card";
 import { RangeBar } from "@/components/RangeBar";
 import { MarginPill } from "@/components/MarginPill";
 import { Reveal } from "@/components/Reveal";
@@ -9,7 +8,7 @@ import { CountUp } from "@/motion/CountUp";
 import { PulseDot } from "@/motion/PulseDot";
 import { formatMoney, formatMoneyCompact, formatPricePerSqft } from "@/format";
 import { SAMPLE_ADDRESSES } from "@/sampleAddresses";
-import { useTokens } from "@/theme/tokens";
+import { BAND, TOKENS, useTokens } from "@/theme/tokens";
 import { PrimaryLinkButton, OutlineLinkButton } from "./buttons";
 import { CheckIcon, GaugeIcon } from "./icons";
 import { PRENTICE, SNAPSHOT_DATE } from "./sampleReports";
@@ -38,9 +37,19 @@ const HEADLINE = ["Know what a", "home is worth", "before you", "make an offer."
 const HEADLINE_TEXT =
   "font-serif text-ink text-[40px] leading-[42px] tracking-[-0.8px] md:text-[60px] md:leading-[63px] md:tracking-[-1.2px] lg:text-[84px] lg:leading-[86px] lg:tracking-[-1.68px]";
 
-// A large, soft version of the Gauge mark's arc and needle, behind the hero card.
+// A large, dimensional version of the Gauge mark behind the hero card: a thick arc and
+// needle with a vertical gradient, a narrow highlight along the top of the arc, an inner
+// shade line and a soft offset shadow. Light: mint to accent green. Dark: the deep greens
+// only, so the glass card's muted text stays AA over it. Every path is under 40 units
+// long, so the arc-drawing CSS (dasharray 40) draws each one fully.
 function ArcShape() {
   const tokens = useTokens();
+  const dark = tokens === TOKENS.dark;
+  const top = dark ? BAND.forest : tokens.accentTint;
+  const bottom = dark ? tokens.accentTint : tokens.accent;
+  const highlight = dark ? tokens.accent : tokens.onAccent;
+  const shadowOpacity = dark ? 0.55 : 0.14;
+  const ARC = "M3.5 17.5a10.5 10.5 0 0 1 21 0";
   return (
     <Svg
       width="100%"
@@ -49,23 +58,26 @@ function ArcShape() {
       preserveAspectRatio="xMidYMin meet"
       {...HIDDEN_FROM_SCREEN_READERS}
     >
-      <Path
-        d="M3.5 17.5a10.5 10.5 0 0 1 21 0"
-        stroke={tokens.accentTint}
-        strokeWidth={5}
-        strokeLinecap="round"
-        fill="none"
-      />
-      <Line
-        x1={14}
-        y1={17.5}
-        x2={19.5}
-        y2={10.5}
-        stroke={tokens.accentTint}
-        strokeWidth={3}
-        strokeLinecap="round"
-      />
-      <Circle cx={14} cy={17.5} r={2.4} fill={tokens.accentTint} />
+      <Defs>
+        <LinearGradient id="gaugeBody" x1="0" y1="0" x2="0" y2="1">
+          <Stop offset="0" stopColor={top} />
+          <Stop offset="1" stopColor={bottom} />
+        </LinearGradient>
+        <RadialGradient id="gaugeHub" cx="0.4" cy="0.35" r="0.7">
+          <Stop offset="0" stopColor={highlight} stopOpacity={0.6} />
+          <Stop offset="1" stopColor={bottom} />
+        </RadialGradient>
+      </Defs>
+      {/* Soft shadow under the arc and needle. */}
+      <Path d={ARC} transform="translate(0 0.9)" stroke={BAND.night} strokeOpacity={shadowOpacity} strokeWidth={6.6} strokeLinecap="round" fill="none" />
+      {/* The arc body. */}
+      <Path d={ARC} stroke="url(#gaugeBody)" strokeWidth={6} strokeLinecap="round" fill="none" />
+      {/* Highlight along the outer top edge, and a shade along the inner edge. */}
+      <Path d="M2.3 17.5a11.7 11.7 0 0 1 23.4 0" stroke={highlight} strokeOpacity={0.5} strokeWidth={0.7} strokeLinecap="round" fill="none" />
+      <Path d="M6.1 17.5a7.9 7.9 0 0 1 15.8 0" stroke={BAND.night} strokeOpacity={dark ? 0.35 : 0.12} strokeWidth={0.6} strokeLinecap="round" fill="none" />
+      <Line x1={14} y1={18.3} x2={19.5} y2={11.3} stroke={BAND.night} strokeOpacity={shadowOpacity} strokeWidth={3.6} strokeLinecap="round" />
+      <Line x1={14} y1={17.5} x2={19.5} y2={10.5} stroke="url(#gaugeBody)" strokeWidth={3.2} strokeLinecap="round" />
+      <Circle cx={14} cy={17.5} r={2.6} fill="url(#gaugeHub)" />
     </Svg>
   );
 }
@@ -73,8 +85,10 @@ function ArcShape() {
 // The sample report card in the hero: real numbers from the first sample report.
 function HeroCard() {
   const r = PRENTICE;
+  // Glass (web): translucent fill, blur, light border and accent shadow ("glass" in
+  // +html.tsx). Same padding and gaps as a report card.
   return (
-    <Card>
+    <View className="glass rounded-[22px] p-5 gap-4">
       <View className="gap-1.5">
         <Reveal trigger="load" from="x-10" delay={T.chip} className="flex-row items-center gap-1.5">
           <PulseDot />
@@ -124,7 +138,7 @@ function HeroCard() {
           </Reveal>
         </View>
       ) : null}
-    </Card>
+    </View>
   );
 }
 
@@ -180,7 +194,7 @@ export function Hero() {
               </View>
             </Reveal>
             <Reveal trigger="load" from="y32" delay={T.card} className="w-full max-w-[420px] pt-20 lg:pt-28">
-              <View className="lift rounded-[18px]">
+              <View className="lift rounded-[22px]">
                 <HeroCard />
               </View>
             </Reveal>

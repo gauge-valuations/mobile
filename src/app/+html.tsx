@@ -25,7 +25,8 @@ html, body, #root { background-color: rgb(var(--color-paper)); color: rgb(var(--
 // theme toggle, Retry): 2px in the accent token. :focus-visible keeps it off for mouse
 // and touch. The address input draws its own accent ring in AddressSearch.tsx.
 const focusCss = `
-[role="button"]:focus-visible, button:focus-visible, a:focus-visible {
+html [role="button"]:focus-visible, html [role="link"]:focus-visible,
+html button:focus-visible, html a:focus-visible {
   outline: 2px solid rgb(var(--color-accent));
   outline-offset: 2px;
 }
@@ -99,13 +100,13 @@ html.motion [data-reveal-from="growx"]:not([data-revealed]) { transform: scaleX(
 
 /* The hero arc draws itself; its needle and hub fade in near the end. */
 [data-reveal-from="draw"] path {
-  stroke-dasharray: 34;
+  stroke-dasharray: 40;
   transition: stroke-dashoffset 1980ms var(--ease-reveal) var(--reveal-delay, 0ms);
 }
 [data-reveal-from="draw"] line, [data-reveal-from="draw"] circle {
   transition: opacity 600ms var(--ease-reveal) calc(var(--reveal-delay, 0ms) + 1200ms);
 }
-html.motion [data-reveal-from="draw"]:not([data-revealed]) path { stroke-dashoffset: 34; }
+html.motion [data-reveal-from="draw"]:not([data-revealed]) path { stroke-dashoffset: 40; }
 html.motion [data-reveal-from="draw"]:not([data-revealed]) line,
 html.motion [data-reveal-from="draw"]:not([data-revealed]) circle { opacity: 0; }
 
@@ -168,6 +169,29 @@ html.motion .drift { animation: gauge-drift 16s ease-in-out 1.6s infinite; }
   .press:hover { opacity: 0.88; }
 }
 .press:active { transform: scale(0.98); }
+
+/* Hero card glass (web): translucent card fill (82% light, 95% dark via --glass-alpha),
+   backdrop blur, a 1px light border and a large soft accent-tinted shadow. Prefixed with
+   "html" so it outranks the base view styles that load after this sheet. */
+html .glass {
+  background-color: rgb(var(--color-card) / var(--glass-alpha));
+  border: 1px solid rgb(var(--color-ink) / 0.12);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 24px 60px -20px rgb(var(--color-accent) / 0.45);
+}
+
+/* Landing mock panels: a visible border, a top highlight and a soft shadow, so mocks
+   stand off the band. "panel" on paper bands, "panel-night" on night bands. */
+html .panel {
+  border-color: rgb(var(--color-ink) / 0.14);
+  box-shadow: inset 0 1px 0 rgb(var(--color-ink) / 0.04), 0 20px 44px -24px rgb(var(--color-night) / 0.5);
+}
+html .panel-night {
+  background-color: rgb(var(--color-on-night) / 0.04);
+  border-color: rgb(var(--color-on-night) / 0.16);
+  box-shadow: inset 0 1px 0 rgb(var(--color-on-night) / 0.06);
+}
 
 /* Reduced motion: everything in its final state, nothing moves. */
 @media (prefers-reduced-motion: reduce) {

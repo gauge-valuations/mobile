@@ -7,26 +7,34 @@ import { Reveal, RevealGroup } from "@/components/Reveal";
 import { FeatureSection, MOCK_ROWS_DELAY } from "./Section";
 import { InfoIcon } from "./icons";
 
-// The report's own low-confidence callout (shown when few comparable homes are usable)
-// and its disclaimer (shown on every report), as they appear there.
+// The report's own low-confidence callout and disclaimer, drawn as the report draws
+// them, each in a report-style card with a line saying when it appears. No estimate
+// number: neither sample report is low confidence, so any number here would be invented.
 function LimitsMock() {
   return (
     <RevealGroup baseDelay={MOCK_ROWS_DELAY} className="gap-4">
       <Reveal trigger="scroll" from="y12" index={0} className="lift rounded-[18px]">
-      <Card>
-        <Text className="font-mono-medium font-medium text-[11px] leading-4 uppercase tracking-widest text-muted">
-          When few comps are usable
-        </Text>
-        <LowConfidenceNote />
-      </Card>
+        <Card className="panel">
+          <Text className="font-mono-medium font-medium text-[11px] leading-4 uppercase tracking-widest text-muted">
+            Estimated value
+          </Text>
+          <Text className="font-sans text-sm text-muted">
+            Shown under the estimate when fewer than three usable comparable homes remain and
+            the report falls back to the data provider's own estimate:
+          </Text>
+          <LowConfidenceNote />
+        </Card>
       </Reveal>
       <Reveal trigger="scroll" from="y12" index={1} className="lift rounded-[18px]">
-      <Card>
-        <Text className="font-mono-medium font-medium text-[11px] leading-4 uppercase tracking-widest text-muted">
-          On every report
-        </Text>
-        <Disclaimer />
-      </Card>
+        <Card className="panel">
+          <Text className="font-mono-medium font-medium text-[11px] leading-4 uppercase tracking-widest text-muted">
+            On every report
+          </Text>
+          <Text className="font-sans text-sm text-muted">
+            At the foot of every report, under the market snapshot:
+          </Text>
+          <Disclaimer />
+        </Card>
       </Reveal>
     </RevealGroup>
   );

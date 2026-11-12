@@ -17,6 +17,9 @@ export default function Index() {
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={["top", "left", "right"]}>
       <View className="flex-1">
+        {/* First in the DOM so keyboard focus starts in the header; it is absolutely
+            positioned over the top of the scrolling content. */}
+        <Header scrolled={scrolled} />
         <ScrollRootContext.Provider value={scrollRef}>
           {/* 72px of top padding for the header, which overlays the content. */}
           <ScrollView
@@ -28,7 +31,6 @@ export default function Index() {
             <LandingPage />
           </ScrollView>
         </ScrollRootContext.Provider>
-        <Header scrolled={scrolled} />
       </View>
     </SafeAreaView>
   );

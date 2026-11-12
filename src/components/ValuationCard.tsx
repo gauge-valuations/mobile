@@ -46,6 +46,7 @@ export function ValuationCard({ valuation }: { valuation: Valuation }) {
           value={estimatedValue}
           format={formatMoney}
           delayMs={80}
+          startCounted
           className="font-serif text-ink text-[48px] leading-[53px] tracking-[-0.96px] md:text-[64px] md:leading-[70px] md:tracking-[-1.28px]"
         />
         {pricePerSqft !== undefined ? (

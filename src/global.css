@@ -31,6 +31,8 @@
   --color-on-forest: 255 255 255; /* #ffffff */
   /* Border around night bands: invisible on light paper, a rule line on dark paper. */
   --color-night-edge: 18 17 15; /* #12110f */
+  /* Hero glass card fill opacity: keeps muted text AA over the shape behind it. */
+  --glass-alpha: 0.82;
 }
 
 /* Dark values. On web the .dark class on <html> selects them; on native NativeWind
@@ -50,4 +52,5 @@
   --color-wait: 251 191 37; /* #fbbf25 */
   --color-wait-tint: 58 42 12; /* #3a2a0c */
   --color-night-edge: 42 39 36; /* #2a2724 */
+  --glass-alpha: 0.95;
 }

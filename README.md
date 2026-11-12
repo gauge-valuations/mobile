@@ -7,11 +7,26 @@ Gauge turns a US property address into a one-screen buyer report: property facts
 
 The two sample addresses under the search box always load. Try one first.
 
-## What the screen shows
+The web app has two pages: a landing page at `/` and the report tool at `/report`. A link to `/report?address=<address>` runs that lookup on load, and a search on the report page writes its address into the URL, so a refresh or a shared link reruns it. The iOS and Android apps skip the landing page and open straight on the report.
+
+## The landing page (`/`, web)
+
+A product page in eight sections: a hero with a sample report card, how comparable homes drive the estimate, the potential margin for the two sample homes side by side, rent and the market, the five-step valuation method, the report's honest limits (asking prices, the low-confidence note, the disclaimer), the services it runs on, and a final address search that opens `/report`. Every real number on it comes from a dated snapshot of the two sample reports (`src/landing/sampleReports.ts`, read off the live site on November 11, 2026); the landing page never calls the backend. The comparable-homes rows in the "how it works" section are a labelled illustration with made-up streets.
+
+Motion, on the web:
+
+- The hero builds in on load: the headline rises line by line, then the paragraph and buttons; a large Gauge-mark shape scales in, draws its arc and then drifts slowly; the sample card rises in, its estimated value counts up from 80% to the final value, and its range bar draws, fills and shows its markers.
+- Further down, each section's headline, text and mock fade in and rise as they reach the lower quarter of the screen, with rows inside the mocks following one after another. Each item plays once; switching theme or expanding a list does not replay anything.
+- The header turns translucent with a blur and a border once the page scrolls.
+- Cards lift slightly on hover with a pointer; buttons and chips respond to hover and press.
+- If the page's JavaScript is slow or fails, everything still appears within 1.5 seconds.
+- When the browser reports reduced motion, everything is shown in its final state at once: no reveals, count-ups, drifting, pulsing or line drawing.
+
+## The report (`/report`)
 
 Before a search, the screen opens on a short intro: a serif headline, one line on what the report covers, the search box and the two sample addresses. A header with the Gauge mark stays at the top, with a theme toggle that cycles system, light and dark. The web version remembers the choice; the native apps keep it for the session.
 
-While a report loads, grey placeholder blocks in the shape of the first cards stand in for it. They pulse gently. When the report arrives, its sections fade in and rise slightly, one after another. Both effects are skipped when the device asks for reduced motion.
+While a report loads, grey placeholder blocks in the shape of the first cards stand in for it. They pulse gently. When the report arrives, its sections fade in and rise slightly, one after another; the estimated value counts up from 80% to the final value (screen readers only ever get the final value) and the range bar draws and fills. All of these are skipped when the device asks for reduced motion.
 
 For an address, the report shows:
 
@@ -101,8 +116,9 @@ npm run build:web  # expo export --platform web --output-dir dist (static web bu
 
 **Built and live:**
 
-- Web app deployed at https://gauge-valuations.vercel.app, connected to the live backend.
-- The single buyer report screen, with an intro screen before the first search, placeholder blocks while loading, tinted error cards, and the report.
+- Web app deployed at https://gauge-valuations.vercel.app, connected to the live backend. `vercel.json` sets `cleanUrls`, so `/report` loads directly and on refresh.
+- A landing page at `/` with load and scroll motion, a translucent header and reduced-motion support.
+- The buyer report screen at `/report` (with `?address=` links), with an intro screen before the first search, placeholder blocks while loading, tinted error cards, and the report.
 - Light and dark themes with a toggle (system, light, dark), remembered on the web.
 - Property facts, estimated value with price per square foot, a value range bar and a low-confidence note.
 - Potential margin vs. list price, worked out on the client when a list price exists.
@@ -117,6 +133,8 @@ npm run build:web  # expo export --platform web --output-dir dist (static web bu
 - The demo runs on a free-tier data plan with a monthly limit. Once that limit is reached, only the two sample addresses are guaranteed to load.
 - Real data requires the backend. Without a base URL the app shows mock data.
 - The iOS and Android builds share the same code but have not been verified against the live backend. The web version is the verified target.
+- In this repo's last check, the app crashed at launch in Expo Go on the iOS simulator (iOS 26.5) with a native error in the animation library's worklets bridge. `npx expo install --check` reports `react-native-reanimated` 4.5.0 and `react-native-worklets` 0.10.0 where SDK 57 expects 4.5.1 and 0.10.1, along with other outdated Expo packages. The native app is not verified until that is resolved.
+- The motion and reduced-motion behavior were checked in a desktop browser (with reduced motion emulated in the page), not with a real operating-system setting or a screen reader.
 
 **Planned, not built:**
 
@@ -131,9 +149,13 @@ npm run build:web  # expo export --platform web --output-dir dist (static web bu
 src/
   app/
     _layout.tsx        root stack, page title
-    +html.tsx          static web document head (web export only)
-    index.tsx          the report screen and its four states
-  components/          cards and rows (ValuationCard, CompsList, RentCard, ...)
+    +html.tsx          static web document head, motion and focus CSS (web export only)
+    index.tsx          the web landing page
+    index.native.tsx   iOS/Android: redirects to /report
+    report.tsx         the report screen and its four states
+  components/          cards and rows (ValuationCard, CompsList, RentCard, Reveal, ...)
+  landing/             landing page sections and sampleReports.ts (the dated sample snapshot)
+  motion/              reveal engine, count-up and the pulsing status dot
   theme/               design tokens, theme choice (ThemeProvider) and native font loading
   api.ts               getPropertyReport: fetch, timeout, failure kinds
   types.ts             PropertyReport contract and parsePropertyReport

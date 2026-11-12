@@ -157,8 +157,9 @@ Components in `src/components/`:
     choice; accent focus ring on web.
 12. `IdleHero` — idle-state label, serif headline and lead line.
 13. `RangeBar` — value or rent range built from plain Views with percentage positions
-    (same on web and native): rule track, accent-tint fill from low to high, accent
-    estimate marker, optional ink list-price marker, low/high end labels (format passed in:
+    (same on web and native): muted track at 35%, accent fill from low to high, accent
+    estimate marker and optional ink list-price marker (both with a 2px card-colored
+    outline so they show on the fill), low/high end labels (format passed in:
     `formatMoneyCompact` for value, `formatMoney` for rent), and a legend in the regular
     size. The end labels sit under the fill ends (low starts at the fill's left edge, high
     ends at its right edge) when the measured fill width fits both labels plus an 8px gap;
@@ -193,7 +194,8 @@ stroke-dashoffset for the hero arc and the header's background, border and blur)
   and chips slide 10px from the left; the receipt enters tilted -3°. Scroll reveals fire
   when the item (or its `RevealGroup`) reaches 75% down the landing ScrollView (the
   observer root); groups stagger 70ms (receipt lines 90ms); nested groups trigger with
-  their outer group. Hero load: headline lines at ~70/115/190/250ms, paragraph 320,
+  their outer group. Below lg (1024px, where sections stack) every scroll item triggers
+  on its own position instead, with its delay capped at 210ms. Hero load: headline lines at ~70/115/190/250ms, paragraph 320,
   buttons 390, check line 440, shape scales in at 150 then drifts (16s, from 1.6s), arc
   draws over 1.98s, card at 600.
 - State lives in DOM attributes React never sets (data-revealed), so theme switches and
@@ -214,8 +216,10 @@ stroke-dashoffset for the hero arc and the header's background, border and blur)
 - Reduced motion: everything in its final state at once (no reveal, count-up, drift,
   pulse or line drawing). The motion CSS lives in `src/app/+html.tsx`.
 
-Accessibility: on web, every button-like control gets a 2px accent `:focus-visible` ring
-from the rule in `+html.tsx` (the address input draws its own). Tap targets are at least
+Accessibility: on web, every button-like control and link (`role="button"`, `role="link"`,
+`<a>`, `<button>`) gets a 2px accent `:focus-visible` ring from the rule in `+html.tsx`
+(the address input draws its own). The overlaid `Header` is rendered before the
+ScrollView in the DOM so keyboard focus starts in the header. Tap targets are at least
 40px tall (Try chips use a 40px tap area around the compact pill). Headings: the idle
 headline, or "Property report" in the other states, is level 1; card titles are level 2;
 the "Gauge" wordmark is not a heading.
@@ -224,14 +228,30 @@ Also in `src/components/`: `MarginPill` and `LowConfidenceNote` (used by `Valuat
 and the landing page), and `MarketStrip` (the market strip from display strings; used by
 `MarketSnapshotStrip`). `CompRow` takes `CompRowData`, the displayed subset of `Comp`.
 
-Landing page (`src/landing/`, web only, no animation yet): `Hero`, then `FeatureSection`s
+Landing page (`src/landing/`, web only; motion described under Motion): `Hero` (a large
+dimensional Gauge-mark shape behind a glass sample-report card), then `FeatureSection`s
 (5/7 columns from lg, alternating sides, stacked below lg) for comps (`#how-it-works`,
 illustrative rows), potential margin (night band, the two samples side by side), rent and
 market (paper-deep, phone frame), the method receipt (forest band with grain; only the five
-README steps), honest limits, "Built on" (night band), a final search (paper-deep) and
-`Footer`. Every real number comes from `sampleReports.ts`, a snapshot dated Nov 11, 2026
-read off the live site; the landing page never calls the backend. Layout: 1280px content
-column, 40px side padding (20px on phones), 128px vertical padding (80px on phones).
+README steps), honest limits (the report's low-confidence note and disclaimer), "Built on"
+(night band), a final search (paper-deep) and `Footer`. Layout: 1280px content column, 40px
+side padding (20px on phones), 128px vertical padding (80px on phones).
+Rules for the landing mocks:
+- Every real number comes from `src/landing/sampleReports.ts`, a dated snapshot of the two
+  sample reports read off the live site (Nov 11, 2026). Never invent a number, and never
+  call the backend from the landing page; refresh the snapshot by reading the live site.
+- The comps rows in "how it works" are a labelled illustration with made-up streets. Like
+  every landing mock they use only "For sale" and "Off market" chips (comp prices are
+  asking prices; Texas does not disclose sale prices). The rent mock keeps "For lease",
+  which is accurate for rentals. Closest matches are outlined (accent at 40%), not tinted:
+  a tint behind muted text fails AA in dark mode.
+- Mock styles (web, in `+html.tsx`, token colors only): `glass` for the hero card (card
+  color at `--glass-alpha`, 82% light / 95% dark so muted text stays AA over the shape;
+  12px blur; 1px ink-12% border; `0 24px 60px -20px` accent shadow at 45%), `panel` for
+  mocks on paper bands and `panel-night` on night bands (visible border, top highlight,
+  soft shadow). Rules there are prefixed with `html` to outrank the base view styles.
+- In dark mode the hero shape uses the deep greens (forest to accent-tint) so the glass
+  card's text stays AA.
 
 Theme and design tokens:
 

@@ -36,7 +36,7 @@ function ComparisonMock() {
   return (
     <View className="gap-4">
       <MockLabel band="night">{`Sample reports · ${SNAPSHOT_DATE}`}</MockLabel>
-      <RevealGroup baseDelay={MOCK_ROWS_DELAY} className="rounded-[18px] border border-on-night/15">
+      <RevealGroup baseDelay={MOCK_ROWS_DELAY} className="panel-night rounded-[18px] border border-on-night/15">
         <View className="flex-row border-b border-on-night/15">
           <View className="hidden sm:flex sm:flex-[4]" />
           {SAMPLE_REPORTS.map((r, c) => (

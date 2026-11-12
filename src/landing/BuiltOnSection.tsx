@@ -31,7 +31,7 @@ export function BuiltOnSection() {
           </Reveal>
         </RevealGroup>
         {/* The four cards appear one after another; each label slides in. */}
-        <RevealGroup className="rounded-[18px] border border-on-night/15 md:flex-row md:flex-wrap">
+        <RevealGroup className="panel-night rounded-[18px] border border-on-night/15 md:flex-row md:flex-wrap">
           {TOOLS.map((tool, i) => (
             <Reveal
               key={tool.name}

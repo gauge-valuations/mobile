@@ -10,11 +10,12 @@ import { HomesIcon } from "./icons";
 type Mark = "closest" | "dropped" | null;
 
 // An illustration, not a real report: made-up streets and prices. The report itself
-// does not show which comps were closest or dropped.
+// does not show which comps were closest or dropped. Only "For sale" and "Off market":
+// comp prices are asking prices (Texas does not disclose sale prices).
 const ROWS: { comp: CompRowData; mark: Mark }[] = [
-  { comp: { address: "118 Elm Hollow Ln", beds: 4, baths: 3, distanceMiles: 0.3, status: "sold", price: 612000, pricePerSqft: 254 }, mark: "closest" },
+  { comp: { address: "118 Elm Hollow Ln", beds: 4, baths: 3, distanceMiles: 0.3, status: "for_sale", price: 612000, pricePerSqft: 254 }, mark: "closest" },
   { comp: { address: "42 Cedar Bluff Rd", beds: 4, baths: 2.5, distanceMiles: 0.5, status: "for_sale", price: 598000, pricePerSqft: 249 }, mark: "closest" },
-  { comp: { address: "907 Larkspur Ct", beds: 3, baths: 2, distanceMiles: 0.8, status: "sold", price: 545000, pricePerSqft: 261 }, mark: null },
+  { comp: { address: "907 Larkspur Ct", beds: 3, baths: 2, distanceMiles: 0.8, status: "off_market", price: 545000, pricePerSqft: 261 }, mark: null },
   { comp: { address: "15 Quarry Rim Dr", beds: 5, baths: 4, distanceMiles: 1.1, status: "for_sale", price: 1150000, pricePerSqft: 412 }, mark: "dropped" },
   { comp: { address: "260 Fern Gully Way", beds: 4, baths: 3, distanceMiles: 1.2, status: "off_market", price: 629000, pricePerSqft: 258 }, mark: null },
 ];
@@ -36,7 +37,7 @@ function MarkLabel({ mark }: { mark: Exclude<Mark, null> }) {
 function CompsMock() {
   return (
     <View className="lift rounded-[18px]">
-    <Card>
+    <Card className="panel">
       <View className="flex-row items-center justify-between">
         <Text className="font-mono-medium font-medium text-[11px] leading-4 uppercase tracking-widest text-muted">
           Comparable homes
@@ -50,7 +51,11 @@ function CompsMock() {
             trigger="scroll"
             from="y12"
             index={i}
-            className={`rounded-xl px-3 -mx-3 ${mark === "closest" ? "bg-accent-tint" : ""} ${
+            // Closest matches get an accent outline, not a fill: any tint behind the muted
+            // row text drops it below AA in dark mode (4.75:1 on the card).
+            className={`rounded-xl border px-3 -mx-3 ${
+              mark === "closest" ? "border-accent/40" : "border-transparent"
+            } ${
               mark && i > 0 ? "mt-1" : ""
             }`}
           >

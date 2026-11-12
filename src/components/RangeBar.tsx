@@ -67,10 +67,12 @@ export function rangePositions(
 
 function Marker({ left, height, className }: { left: number; height: number; className: string }) {
   // 3px wide, centered on its value.
+  // A 3px bar with a 2px card-colored outline (7px overall), so the accent estimate
+  // marker stays visible on the accent fill.
   return (
     <View
-      className={`absolute top-0 w-[3px] rounded-full ${className}`}
-      style={{ left: `${left}%`, height, marginLeft: -1.5 }}
+      className={`absolute rounded-full border-2 border-card ${className}`}
+      style={{ left: `${left}%`, top: -2, width: 7, height: height + 4, marginLeft: -3.5 }}
     />
   );
 }
@@ -84,8 +86,8 @@ function LegendTick({ className, label }: { className: string; label: string }) 
   );
 }
 
-// Horizontal value range: rule-colored track, accent-tint fill from low to high, an
-// accent marker for the estimate and an ink marker for the list price. Built from
+// Horizontal value range: a muted track (35%), an accent fill from low to high, an
+// accent marker for the estimate and an ink marker for the list price, both outlined. Built from
 // plain Views with percentage positions so it renders the same on web and native.
 // Markers carry no labels (they would collide); the legend explains them.
 export function RangeBar({
@@ -137,12 +139,12 @@ export function RangeBar({
       <View style={{ height: markerHeight }}>
         <View
           {...(animate ? trackMotion : {})}
-          className="absolute left-0 right-0 rounded-full bg-rule"
+          className="absolute left-0 right-0 rounded-full bg-muted/35"
           style={{ top: trackTop, height: trackHeight }}
         >
           <View
             {...(animate ? fillMotion : {})}
-            className="absolute top-0 bottom-0 rounded-full bg-accent-tint"
+            className="absolute top-0 bottom-0 rounded-full bg-accent"
             style={{ left: `${pos.low}%`, width: `${Math.max(0, pos.high - pos.low)}%` }}
           />
         </View>

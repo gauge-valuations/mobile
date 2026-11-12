@@ -102,6 +102,9 @@ export default function ResultsScreen() {
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={["top", "left", "right"]}>
       <View className="flex-1">
+      {/* First in the DOM so keyboard focus starts in the header; it overlays the top of
+          the scrolling report and stays visible over a long report. */}
+      <Header scrolled={scrolled} />
       <ScrollView
         onScroll={onScroll}
         scrollEventThrottle={16}
@@ -155,8 +158,6 @@ export default function ResultsScreen() {
           </View>
         ) : null}
       </ScrollView>
-      {/* Overlays the top of the scrolling report; stays visible over a long report. */}
-      <Header scrolled={scrolled} />
       </View>
     </SafeAreaView>
   );

@@ -60,24 +60,35 @@ type RevealOptions = {
   mode: "load" | "scroll";
   delay?: number;
   duration?: number;
+  // Below lg, scroll items trigger on their own position (not their group's), since
+  // stacked layouts put a mock far below its text; this is their delay there.
+  narrowDelay?: number;
 };
+
+// The lg breakpoint, below which side-by-side sections stack.
+const STACKED_BELOW = 1024;
+const MAX_NARROW_DELAY = 210;
 
 // Props that make any View a reveal item: a ref and the data attribute the CSS keys
 // on. On native it returns nothing, so the View renders in its final state.
-export function useRevealProps({ from, mode, delay, duration }: RevealOptions) {
+export function useRevealProps({ from, mode, delay, duration, narrowDelay }: RevealOptions) {
   const ref = useRef<View>(null);
   const scrollRoot = useContext(ScrollRootContext);
   const group = useContext(RevealGroupContext);
   useEffect(() => {
     if (!IS_WEB || !ref.current) return;
+    const stacked = mode === "scroll" && (globalThis.innerWidth ?? STACKED_BELOW) < STACKED_BELOW;
     return registerReveal({
       el: ref.current as unknown as HTMLElement,
       from,
-      delay,
+      delay: stacked ? Math.min(narrowDelay ?? delay ?? 0, MAX_NARROW_DELAY) : delay,
       duration,
       mode,
       root: mode === "scroll" ? scrollNode(scrollRoot) : null,
-      group: mode === "scroll" && group ? (group.anchor.current as unknown as HTMLElement | null) : null,
+      group:
+        mode === "scroll" && group && !stacked
+          ? (group.anchor.current as unknown as HTMLElement | null)
+          : null,
     });
     // Registered once per mount; later re-renders never re-trigger it.
   }, []);
@@ -122,6 +133,7 @@ function WebReveal({ children, index = 0, trigger, from = "y16", delay, duration
     from,
     mode: trigger === "load" ? "load" : "scroll",
     delay: delay ?? (group?.baseDelay ?? 0) + index * stagger,
+    narrowDelay: delay !== undefined ? delay : index * stagger,
     duration,
   });
   return (

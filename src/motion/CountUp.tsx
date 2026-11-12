@@ -11,6 +11,10 @@ type CountUpProps = {
   durationMs?: number;
   // Start from this share of the value (0.8 = 80%).
   fromRatio?: number;
+  // Render the starting value from the very first frame (for values that only ever
+  // render on the client, like the report's). Without it the first render shows the
+  // final value, which keeps the static web HTML correct if JavaScript never runs.
+  startCounted?: boolean;
 };
 
 const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
@@ -26,10 +30,13 @@ export function CountUp({
   delayMs = 0,
   durationMs = 1200,
   fromRatio = 0.8,
+  startCounted = false,
 }: CountUpProps) {
   const reduceMotion = useReducedMotion();
   // null = not counting: show the final value.
-  const [shown, setShown] = useState<number | null>(null);
+  const [shown, setShown] = useState<number | null>(() =>
+    startCounted && !reduceMotion ? value * fromRatio : null,
+  );
 
   useEffect(() => {
     if (reduceMotion) return;
