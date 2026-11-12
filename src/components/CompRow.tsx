@@ -3,8 +3,15 @@ import type { Comp } from "@/types";
 import { formatMoney, bedsBaths, formatDistance, formatPricePerSqft } from "@/format";
 import { StatusBadge } from "./StatusBadge";
 
+// Only the fields the row displays, so the landing page can show sample rows without
+// the full Comp. Any Comp fits.
+export type CompRowData = Pick<
+  Comp,
+  "address" | "beds" | "baths" | "distanceMiles" | "status" | "price" | "pricePerSqft"
+>;
+
 type CompRowProps = {
-  comp: Comp;
+  comp: CompRowData;
   // Marks a rent comp, whose $/sqft is a monthly rate shown with cents.
   monthly?: boolean;
   // The first row has no divider above it; every other row draws one, so there is

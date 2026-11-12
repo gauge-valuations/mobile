@@ -1,13 +1,10 @@
 import { View, Text } from "react-native";
 import type { Valuation } from "@/types";
-import {
-  formatMoney,
-  formatMoneyCompact,
-  formatPricePerSqft,
-  formatSignedMoney,
-} from "@/format";
+import { formatMoney, formatMoneyCompact, formatPricePerSqft } from "@/format";
 import { Card } from "./Card";
 import { RangeBar } from "./RangeBar";
+import { MarginPill } from "./MarginPill";
+import { LowConfidenceNote } from "./LowConfidenceNote";
 
 // NOTE: This is an ESTIMATED VALUE and a POTENTIAL MARGIN vs. list price only.
 // It is deliberately NOT value-minus-debt, since we cannot know what is owed on
@@ -28,7 +25,6 @@ export function ValuationCard({ valuation }: { valuation: Valuation }) {
   // The backend may omit potentialMargin; derive it from the list price when it's missing.
   const margin =
     listPrice === undefined ? undefined : (potentialMargin ?? estimatedValue - listPrice);
-  const positive = (margin ?? 0) >= 0;
 
   // The bar's values in words, for screen readers.
   const rangeLabel =
@@ -71,20 +67,7 @@ export function ValuationCard({ valuation }: { valuation: Valuation }) {
               {formatMoney(listPrice)}
             </Text>
           </View>
-          {/* The sign is in the text, not only in the color. */}
-          <View
-            className={`self-start rounded-full border px-3 py-1.5 ${
-              positive ? "bg-gain-tint border-gain-tint" : "bg-loss-tint border-loss-tint"
-            }`}
-          >
-            <Text
-              className={`font-sans-medium font-medium text-[13px] leading-[18px] ${
-                positive ? "text-gain" : "text-loss"
-              }`}
-            >
-              {formatSignedMoney(margin)} potential margin vs. list price
-            </Text>
-          </View>
+          <MarginPill margin={margin} />
         </View>
       ) : (
         <Text className="font-sans text-sm text-muted">
@@ -92,11 +75,7 @@ export function ValuationCard({ valuation }: { valuation: Valuation }) {
         </Text>
       )}
 
-      {lowConfidence === true ? (
-        <View className="rounded-[10px] bg-wait-tint p-3">
-          <Text className="font-sans text-sm text-wait">Low confidence: few comparable homes.</Text>
-        </View>
-      ) : null}
+      {lowConfidence === true ? <LowConfidenceNote /> : null}
     </Card>
   );
 }

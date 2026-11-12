@@ -21,6 +21,16 @@
   --color-loss-tint: 254 226 226; /* #fee2e2 */
   --color-wait: 143 92 22; /* #8f5c16 */
   --color-wait-tint: 254 243 199; /* #fef3c7 */
+
+  /* Landing-page bands. Fixed: the same in light and dark (only night-edge changes). */
+  --color-night: 18 17 15; /* #12110f */
+  --color-on-night: 237 237 237; /* #ededed */
+  --color-night-muted: 138 133 128; /* #8a8580 */
+  --color-night-accent: 79 181 137; /* #4fb589 */
+  --color-forest: 31 111 80; /* #1f6f50 */
+  --color-on-forest: 255 255 255; /* #ffffff */
+  /* Border around night bands: invisible on light paper, a rule line on dark paper. */
+  --color-night-edge: 18 17 15; /* #12110f */
 }
 
 /* Dark values. On web the .dark class on <html> selects them; on native NativeWind
@@ -39,4 +49,5 @@
   --color-loss-tint: 58 23 23; /* #3a1717 */
   --color-wait: 251 191 37; /* #fbbf25 */
   --color-wait-tint: 58 42 12; /* #3a2a0c */
+  --color-night-edge: 42 39 36; /* #2a2724 */
 }

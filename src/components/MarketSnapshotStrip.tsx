@@ -17,17 +17,36 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
+type MarketStripProps = {
+  // Already formatted, as shown on screen (e.g. "$1.3M", "38", "78745").
+  medianPrice: string;
+  daysOnMarket: string;
+  zip: string;
+};
+
+// The strip itself, from display strings. Also used by the landing page, whose sample
+// values are stored as shown.
+export function MarketStrip({ medianPrice, daysOnMarket, zip }: MarketStripProps) {
+  return (
+    <View className="flex-row rounded-[18px] bg-paper-deep py-5 px-2">
+      <Stat label="Median price" value={medianPrice} />
+      <View className="w-px bg-rule" />
+      <Stat label="Avg days on market" value={daysOnMarket} />
+      <View className="w-px bg-rule" />
+      <Stat label="ZIP" value={zip} />
+    </View>
+  );
+}
+
 // Three stats on paper-deep, separated by 1px rule dividers. No border.
 export function MarketSnapshotStrip({ market }: { market: MarketSnapshot }) {
   return (
-    <View className="flex-row rounded-[18px] bg-paper-deep py-5 px-2">
-      {/* Compact with one million decimal ($585K, $1.3M): full dollars do not fit a
-          third of a 360px screen. */}
-      <Stat label="Median price" value={formatMoneyCompact(market.medianPrice, 1)} />
-      <View className="w-px bg-rule" />
-      <Stat label="Avg days on market" value={formatDaysOnMarket(market.avgDaysOnMarket)} />
-      <View className="w-px bg-rule" />
-      <Stat label="ZIP" value={market.zip} />
-    </View>
+    <MarketStrip
+      // Compact with one million decimal ($585K, $1.3M): full dollars do not fit a
+      // third of a 360px screen.
+      medianPrice={formatMoneyCompact(market.medianPrice, 1)}
+      daysOnMarket={formatDaysOnMarket(market.avgDaysOnMarket)}
+      zip={market.zip}
+    />
   );
 }

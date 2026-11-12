@@ -17,7 +17,11 @@ module.exports = {
   // .dark class is managed by src/theme/ThemeProvider.tsx (and the pre-paint script
   // in src/app/+html.tsx on web).
   darkMode: "class",
-  content: ["./src/app/**/*.{js,jsx,ts,tsx}", "./src/components/**/*.{js,jsx,ts,tsx}"],
+  content: [
+    "./src/app/**/*.{js,jsx,ts,tsx}",
+    "./src/components/**/*.{js,jsx,ts,tsx}",
+    "./src/landing/**/*.{js,jsx,ts,tsx}",
+  ],
   presets: [require("nativewind/preset")],
   theme: {
     extend: {
@@ -37,6 +41,14 @@ module.exports = {
         "loss-tint": token("loss-tint"),
         wait: token("wait"),
         "wait-tint": token("wait-tint"),
+        // Landing-page bands; fixed in both themes (see src/global.css).
+        night: token("night"),
+        "on-night": token("on-night"),
+        "night-muted": token("night-muted"),
+        "night-accent": token("night-accent"),
+        "night-edge": token("night-edge"),
+        forest: token("forest"),
+        "on-forest": token("on-forest"),
       },
       fontFamily: {
         serif: ["Newsreader_400Regular", ...SERIF],

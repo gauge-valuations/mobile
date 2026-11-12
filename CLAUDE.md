@@ -47,7 +47,7 @@ repo/session — do not build it here.
 4. **Show an "Estimates only — not an appraisal" disclaimer** somewhere visible on the
    results screen. AVMs and rent estimates are estimates.
 
-5. **Scope = Phase 1, retail home buyer, ONE screen.** Do not build investor/agent/seller
+5. **Scope = Phase 1, retail home buyer: one report screen plus a web landing page.** Do not build investor/agent/seller
    features, user accounts, maps, or alerts yet. If a change would add one of those, stop
    and flag it instead of building it.
 
@@ -92,11 +92,18 @@ The web build is deployed at https://gauge-valuations.vercel.app (Vercel, built 
 `main` with `npm run build:web`, output `dist`, `EXPO_PUBLIC_*` set at build time). The two
 `SAMPLE_ADDRESSES` are cached on the backend and always load, even after the demo's
 monthly lookup limit is reached; keep the list in sync with the backend.
+`vercel.json` sets `cleanUrls: true` so `/report` is served from `report.html` (without it,
+loading or refreshing `/report` returns 404). No SPA rewrite: the static export has one
+HTML file per route.
 
 ## What exists (orientation — this is built, do not rebuild)
 
-`src/app/index.tsx` renders the full buyer report and handles idle / loading / error / done.
-State is local to the screen; `searchIdRef` discards responses from superseded searches.
+Routes: `src/app/index.tsx` is the web landing page (`src/landing/`);
+`src/app/index.native.tsx` redirects the iOS and Android apps straight to `/report`.
+`src/app/report.tsx` renders the full buyer report and handles idle / loading / error / done.
+`/report?address=...` runs that lookup on load and prefills the input; a search on the page
+writes its address back into the URL. State is local to the screen; `searchIdRef` discards
+responses from superseded searches.
 Loading shows `ReportSkeleton`; errors show `ErrorCard`; a report's six sections are each
 wrapped in `Reveal`. `Header` sits fixed above the ScrollView. In the idle state `IdleHero` renders above
 `AddressSearch`; its slot stays in the tree (null when not idle) so `AddressSearch` is never
@@ -139,8 +146,11 @@ Components in `src/components/`:
    rule line.
 8. `Card` — shared container: 18px radius, 1px rule border, card background, 20px
    padding, no shadow; `title` renders as a mono 11px uppercase muted label.
-9. `Header` — fixed top bar in the 720px column: `LogoMark` + serif "Gauge" wordmark on the
-   left, `ThemeToggle` on the right.
+9. `Header` — fixed top bar shared by the landing page and the report (1280px column):
+   `LogoMark` + "Gauge" linking to `/`; on web, "How it works" (scrolls to
+   `#how-it-works`, or opens `/#how-it-works`) and "Sample report" (first sample address),
+   hidden below md; `ThemeToggle` and a "Try an address" button to `/report`. Native shows
+   only the logo and the toggle.
 10. `LogoMark` — Gauge's own mark: 28px accent rounded square with a gauge arc and needle
     in on-accent, drawn with react-native-svg.
 11. `ThemeToggle` — 40px button cycling system → light → dark; SVG icon shows the current
@@ -183,12 +193,30 @@ from the rule in `+html.tsx` (the address input draws its own). Tap targets are 
 headline, or "Property report" in the other states, is level 1; card titles are level 2;
 the "Gauge" wordmark is not a heading.
 
+Also in `src/components/`: `MarginPill` and `LowConfidenceNote` (used by `ValuationCard`
+and the landing page), and `MarketStrip` (the market strip from display strings; used by
+`MarketSnapshotStrip`). `CompRow` takes `CompRowData`, the displayed subset of `Comp`.
+
+Landing page (`src/landing/`, web only, no animation yet): `Hero`, then `FeatureSection`s
+(5/7 columns from lg, alternating sides, stacked below lg) for comps (`#how-it-works`,
+illustrative rows), potential margin (night band, the two samples side by side), rent and
+market (paper-deep, phone frame), the method receipt (forest band with grain; only the five
+README steps), honest limits, "Built on" (night band), a final search (paper-deep) and
+`Footer`. Every real number comes from `sampleReports.ts`, a snapshot dated Nov 11, 2026
+read off the live site; the landing page never calls the backend. Layout: 1280px content
+column, 40px side padding (20px on phones), 128px vertical padding (80px on phones).
+
 Theme and design tokens:
 
 - Tokens (paper, paper-deep, card, rule, ink, muted, accent, accent-tint, on-accent, gain,
   gain-tint, loss, loss-tint, wait, wait-tint) are Tailwind colors in `tailwind.config.js`
   that read CSS variables from `src/global.css` (`:root` = light, `.dark:root` = dark).
   Use the token classes; do not add `dark:` variants or raw palette colors.
+  Landing bands add `night`, `on-night`, `night-muted`, `night-accent`, `forest` and
+  `on-forest`, which are the same in both themes (`BAND` in `tokens.ts`), and
+  `night-edge`, a border that only shows on dark paper. On web `useTokens()` returns the
+  light set for the first render, then the real theme, so SVG colors repaint after
+  hydration.
   `src/theme/tokens.ts` holds the same values as hex (`TOKENS`, `useTokens()`) only for
   props that take a color value (placeholder, ActivityIndicator, SVG, web outline). Keep
   the two in sync.

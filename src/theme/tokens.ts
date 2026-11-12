@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import { Platform } from "react-native";
 import { useColorScheme } from "nativewind";
 
 // The design tokens as hex, for the few props that take a color value instead of a
@@ -37,11 +39,32 @@ export const TOKENS = {
   },
 } as const;
 
+// Landing-page band colors, the same in both themes. Hex copies of the band variables
+// in src/global.css, for SVG fills on those bands. Keep in sync.
+export const BAND = {
+  night: "#12110f",
+  onNight: "#ededed",
+  nightMuted: "#8a8580",
+  nightAccent: "#4fb589",
+  forest: "#1f6f50",
+  onForest: "#ffffff",
+} as const;
+
 export type ResolvedScheme = keyof typeof TOKENS;
 export type TokenSet = (typeof TOKENS)[ResolvedScheme];
 
+const IS_WEB = Platform.OS === "web";
+
 // The token hex values for the theme currently in effect.
+// On web the static HTML is rendered with the light set, and hydration keeps the
+// server's SVG attributes even when the page is already dark. So the first client
+// render also uses the light set, and the real theme applies right after mount; that
+// update repaints every color passed as a prop. Native has no static HTML.
 export function useTokens(): TokenSet {
   const { colorScheme } = useColorScheme();
-  return TOKENS[colorScheme === "dark" ? "dark" : "light"];
+  const [mounted, setMounted] = useState(!IS_WEB);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  return TOKENS[mounted && colorScheme === "dark" ? "dark" : "light"];
 }

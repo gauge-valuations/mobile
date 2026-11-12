@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { View, TextInput, Pressable, Text, Platform, type TextStyle } from "react-native";
 import { SAMPLE_ADDRESSES } from "@/sampleAddresses";
 import { useTokens } from "@/theme/tokens";
@@ -19,11 +19,17 @@ type AddressSearchProps = {
   // The "Property report" heading. Hidden in the idle state, where IdleHero's
   // headline sits above the search instead.
   showTitle: boolean;
+  // Prefills the input (e.g. from /report?address=). Applied after mount, so the
+  // static web HTML and the first client render match.
+  initialValue?: string;
 };
 
 // Address input + search button at the top of the results screen.
-export function AddressSearch({ onSearch, loading, showTitle }: AddressSearchProps) {
+export function AddressSearch({ onSearch, loading, showTitle, initialValue }: AddressSearchProps) {
   const [value, setValue] = useState("");
+  useEffect(() => {
+    if (initialValue) setValue(initialValue);
+  }, [initialValue]);
   const [focused, setFocused] = useState(false);
   const tokens = useTokens();
   const trimmed = value.trim();

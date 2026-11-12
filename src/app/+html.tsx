@@ -46,6 +46,27 @@ const themeScript = `(function () {
   for (var i = 0; i < metas.length; i++) metas[i].setAttribute("content", dark ? "${DARK_BG}" : "${LIGHT_BG}");
 })();`;
 
+// Subtle film grain for the landing page's forest band (class "grain"): grayscale SVG
+// noise, blended over the band at low opacity and drawn under the band's content.
+const GRAIN_SVG =
+  "<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'>" +
+  "<filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/>" +
+  "<feColorMatrix type='saturate' values='0'/></filter>" +
+  "<rect width='100%' height='100%' filter='url(%23n)'/></svg>";
+const grainCss = `
+.grain { position: relative; }
+.grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.16;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,${GRAIN_SVG}");
+  background-size: 180px 180px;
+}
+`;
+
 export default function Root({ children }: PropsWithChildren) {
   return (
     <html lang="en">
@@ -71,6 +92,7 @@ export default function Root({ children }: PropsWithChildren) {
         <ScrollViewStyleReset />
         <style dangerouslySetInnerHTML={{ __html: backgroundCss }} />
         <style dangerouslySetInnerHTML={{ __html: focusCss }} />
+        <style dangerouslySetInnerHTML={{ __html: grainCss }} />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body>{children}</body>
