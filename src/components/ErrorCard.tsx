@@ -63,7 +63,7 @@ export function ErrorCard({ failure, message, retryable, onRetry }: ErrorCardPro
         <Pressable
           onPress={onRetry}
           accessibilityRole="button"
-          className="h-10 self-start items-center justify-center rounded-lg bg-ink px-4"
+          className="press h-10 self-start items-center justify-center rounded-lg bg-ink px-4"
         >
           <Text className="font-sans-medium font-medium text-sm text-paper">Retry</Text>
         </Pressable>

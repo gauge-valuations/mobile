@@ -2,6 +2,7 @@ import { View, Text } from "react-native";
 import type { Comp } from "@/types";
 import { formatMoney, bedsBaths, formatDistance, formatPricePerSqft } from "@/format";
 import { StatusBadge } from "./StatusBadge";
+import { Reveal } from "./Reveal";
 
 // Only the fields the row displays, so the landing page can show sample rows without
 // the full Comp. Any Comp fits.
@@ -17,9 +18,12 @@ type CompRowProps = {
   // The first row has no divider above it; every other row draws one, so there is
   // never a divider after the last visible row.
   first?: boolean;
+  // Landing page only: slide the status chip in (10px from the left) as part of the
+  // row's reveal group, at this stagger index. The report leaves it unset.
+  badgeRevealIndex?: number;
 };
 
-export function CompRow({ comp, monthly = false, first = false }: CompRowProps) {
+export function CompRow({ comp, monthly = false, first = false, badgeRevealIndex }: CompRowProps) {
   return (
     <View
       className={`flex-row items-center justify-between gap-3 py-3 ${
@@ -34,7 +38,13 @@ export function CompRow({ comp, monthly = false, first = false }: CompRowProps) 
           <Text className="font-sans text-xs text-muted">
             {bedsBaths(comp.beds, comp.baths)} · {formatDistance(comp.distanceMiles)}
           </Text>
-          <StatusBadge status={comp.status} />
+          {badgeRevealIndex === undefined ? (
+            <StatusBadge status={comp.status} />
+          ) : (
+            <Reveal trigger="scroll" from="x-10" index={badgeRevealIndex}>
+              <StatusBadge status={comp.status} />
+            </Reveal>
+          )}
         </View>
       </View>
       {/* Price column never shrinks or wraps; the address column gives way instead. */}

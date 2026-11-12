@@ -2,6 +2,7 @@ import { View, Text } from "react-native";
 import { useRouter } from "expo-router";
 import { AddressSearch } from "@/components/AddressSearch";
 import { useTokens } from "@/theme/tokens";
+import { Reveal, RevealGroup } from "@/components/Reveal";
 import { BandSection } from "./Section";
 import { SearchIcon } from "./icons";
 
@@ -12,9 +13,12 @@ export function CtaSection() {
   const router = useRouter();
   return (
     <BandSection band="paper-deep">
-      <View className="gap-10 lg:flex-row lg:items-end lg:gap-10">
+      <RevealGroup className="gap-10 lg:flex-row lg:items-end lg:gap-10">
         <View className="gap-5 lg:flex-1">
-          <SearchIcon color={tokens.accent} />
+          <Reveal trigger="scroll" from="y6" index={0}>
+            <SearchIcon color={tokens.accent} />
+          </Reveal>
+          <Reveal trigger="scroll" from="y24" index={1}>
           <Text
             role="heading"
             aria-level={2}
@@ -22,15 +26,16 @@ export function CtaSection() {
           >
             Look up a home.
           </Text>
+          </Reveal>
         </View>
-        <View className="lg:flex-1">
+        <Reveal trigger="scroll" from="y16" index={2} className="lg:flex-1">
           <AddressSearch
             showTitle={false}
             loading={false}
             onSearch={(address) => router.push({ pathname: "/report", params: { address } })}
           />
-        </View>
-      </View>
+        </Reveal>
+      </RevealGroup>
     </BandSection>
   );
 }

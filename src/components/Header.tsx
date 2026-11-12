@@ -21,22 +21,36 @@ function goToHowItWorks(onLanding: boolean) {
 
 function NavLink({ label, onPress }: { label: string; onPress: () => void }) {
   return (
-    <Pressable onPress={onPress} role="link" className="min-h-[40px] justify-center">
+    <Pressable onPress={onPress} role="link" className="press min-h-[40px] justify-center">
       <Text className="font-sans text-[15px] text-ink">{label}</Text>
     </Pressable>
   );
 }
 
-// Fixed bar above the scrolling content, shared by the landing page and the report.
-// Logo and wordmark link home. On web: "How it works" and "Sample report" links (hidden
-// below md so nothing wraps on phones), the theme toggle and a "Try an address" button.
-// The native apps have no landing page, so they show only the logo and the toggle.
-export function Header() {
+// Scrolled past this many px, the header turns translucent with a border and blur.
+export const HEADER_SCROLL_THRESHOLD = 41;
+
+// Bar overlaying the top of the scrolling content, shared by the landing page and the
+// report (the pages pad their content by 72px). Logo and wordmark link home. On web:
+// "How it works" and "Sample report" links (hidden below md so nothing wraps on phones),
+// the theme toggle and a "Try an address" button. The native apps have no landing page,
+// so they show only the logo and the toggle.
+// At the top: solid paper, transparent border. Scrolled (web): paper at 75%, a rule
+// border and a backdrop blur, over 0.3s (the blur and timing are in +html.tsx). Native
+// stays solid, since it has no blur behind the bar.
+export function Header({ scrolled = false }: { scrolled?: boolean }) {
   const pathname = usePathname();
   const onLanding = pathname === "/";
+  const glass = scrolled && IS_WEB;
+  const headerData = IS_WEB ? ({ dataSet: { header: "", scrolled: String(scrolled) } } as object) : {};
 
   return (
-    <View className="border-b border-rule bg-paper">
+    <View
+      {...headerData}
+      className={`absolute left-0 right-0 top-0 z-10 border-b ${
+        glass ? "bg-paper/75 border-rule" : scrolled ? "bg-paper border-rule" : "bg-paper border-transparent"
+      }`}
+    >
       <View className="w-full max-w-[1280px] self-center h-[72px] flex-row items-center justify-between gap-4 px-5 lg:px-10">
         <View className="flex-row items-center gap-8">
           <Link href="/" asChild>
@@ -53,7 +67,7 @@ export function Header() {
             <View className="hidden md:flex flex-row items-center gap-6">
               <NavLink label="How it works" onPress={() => goToHowItWorks(onLanding)} />
               <Link href={{ pathname: "/report", params: { address: SAMPLE_ADDRESSES[0] } }} asChild>
-                <Pressable role="link" className="min-h-[40px] justify-center">
+                <Pressable role="link" className="press min-h-[40px] justify-center">
                   <Text className="font-sans text-[15px] text-ink">Sample report</Text>
                 </Pressable>
               </Link>
@@ -66,7 +80,7 @@ export function Header() {
             <Link href="/report" asChild>
               <Pressable
                 role="link"
-                className="h-10 items-center justify-center rounded-lg bg-ink px-4"
+                className="press h-10 items-center justify-center rounded-lg bg-ink px-4"
               >
                 <Text className="font-sans-medium font-medium text-sm text-paper">
                   Try an address

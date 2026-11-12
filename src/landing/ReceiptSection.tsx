@@ -1,6 +1,7 @@
 import { View, Text } from "react-native";
 import { BAND } from "@/theme/tokens";
-import { FeatureSection } from "./Section";
+import { Reveal, RevealGroup } from "@/components/Reveal";
+import { FeatureSection, MOCK_ROWS_DELAY } from "./Section";
 import { ReceiptIcon } from "./icons";
 
 // The valuation method, step by step, as the README describes it ("How the valuation
@@ -13,33 +14,36 @@ const STEPS = [
   "Fewer than three usable comps left: use the provider's own estimate and mark it low confidence.",
 ];
 
-// A printed-receipt style card: mono type, dashed rules, a torn bottom edge.
+// A printed-receipt style card: mono type, dashed rules, a torn bottom edge. It enters
+// tilted (-3deg) and rising, settles straight, then prints line by line (90ms apart).
 function ReceiptMock() {
   return (
     <View className="self-center w-full max-w-[420px]">
-      <View className="bg-card rounded-t-md px-6 pt-7 pb-6 gap-5">
-        <View className="items-center gap-1">
+      <RevealGroup baseDelay={MOCK_ROWS_DELAY + 200} stagger={90} className="bg-card rounded-t-md px-6 pt-7 pb-6 gap-5">
+        <Reveal trigger="scroll" from="y6" index={0} className="items-center gap-1">
           <Text className="font-mono-medium font-medium text-[11px] leading-4 uppercase tracking-widest text-muted">
             Method
           </Text>
           <Text className="font-serif text-2xl text-ink text-center">How the estimate is built</Text>
-        </View>
+        </Reveal>
         <View className="border-t border-dashed border-rule" />
         <View className="gap-4">
           {STEPS.map((step, i) => (
-            <View key={step} className="flex-row gap-3">
+            <Reveal key={step} trigger="scroll" from="y6" index={i + 1} className="flex-row gap-3">
               <Text className="font-mono-medium font-medium text-sm text-accent w-6">
                 {String(i + 1).padStart(2, "0")}
               </Text>
               <Text className="flex-1 font-mono text-[13px] leading-5 text-ink">{step}</Text>
-            </View>
+            </Reveal>
           ))}
         </View>
         <View className="border-t border-dashed border-rule" />
-        <Text className="font-mono text-xs leading-5 text-muted text-center">
-          Estimates only — not an appraisal.
-        </Text>
-      </View>
+        <Reveal trigger="scroll" from="y6" index={STEPS.length + 1}>
+          <Text className="font-mono text-xs leading-5 text-muted text-center">
+            Estimates only — not an appraisal.
+          </Text>
+        </Reveal>
+      </RevealGroup>
       {/* Torn edge: a row of small card-colored triangles. */}
       <View className="flex-row overflow-hidden">
         {Array.from({ length: 16 }, (_, i) => (
@@ -61,6 +65,7 @@ export function ReceiptSection() {
       headline="See how the number is built."
       paragraph="Gauge follows the same method every time: price per square foot for each comparable home, outliers dropped, the rest weighted by how similar the data provider scores them, then the weighted median applied to the home's square footage."
       mock={<ReceiptMock />}
+      mockFrom="tilt"
       textSide="left"
     />
   );

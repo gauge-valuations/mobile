@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { View, Text, type LayoutChangeEvent } from "react-native";
+import { useRevealProps } from "./Reveal";
 
 type RangeBarProps = {
   low: number;
@@ -14,7 +15,13 @@ type RangeBarProps = {
   size?: "regular" | "compact";
   // The real values in words, since the bar itself is visual only.
   accessibilityLabel: string;
+  // Web: animate in after this many ms: the track draws (0.7s), then the fill grows
+  // to its position (0.7s), then the markers fade in. Omitted: no animation.
+  animateDelayMs?: number;
 };
+
+const TRACK_MS = 700;
+const FILL_MS = 700;
 
 type Positions = { low: number; high: number; estimate: number; listPrice?: number };
 
@@ -89,6 +96,7 @@ export function RangeBar({
   format,
   size = "regular",
   accessibilityLabel,
+  animateDelayMs,
 }: RangeBarProps) {
   const pos = rangePositions(low, high, estimate, listPrice);
   const compact = size === "compact";
@@ -112,6 +120,13 @@ export function RangeBar({
     widths.high !== undefined &&
     fillWidth >= widths.low + widths.high + LABEL_GAP;
 
+  // The three animated parts. Their props are only applied when animating.
+  const d = animateDelayMs ?? 0;
+  const trackMotion = useRevealProps({ from: "growx", mode: "load", delay: d, duration: TRACK_MS });
+  const fillMotion = useRevealProps({ from: "growx", mode: "load", delay: d + TRACK_MS, duration: FILL_MS });
+  const markerMotion = useRevealProps({ from: "fade", mode: "load", delay: d + TRACK_MS + FILL_MS - 100 });
+  const animate = animateDelayMs !== undefined;
+
   return (
     <View
       accessible
@@ -121,18 +136,24 @@ export function RangeBar({
     >
       <View style={{ height: markerHeight }}>
         <View
+          {...(animate ? trackMotion : {})}
           className="absolute left-0 right-0 rounded-full bg-rule"
           style={{ top: trackTop, height: trackHeight }}
         >
           <View
+            {...(animate ? fillMotion : {})}
             className="absolute top-0 bottom-0 rounded-full bg-accent-tint"
             style={{ left: `${pos.low}%`, width: `${Math.max(0, pos.high - pos.low)}%` }}
           />
         </View>
-        {pos.listPrice !== undefined ? (
-          <Marker left={pos.listPrice} height={markerHeight} className="bg-ink" />
-        ) : null}
-        <Marker left={pos.estimate} height={markerHeight} className="bg-accent" />
+        {/* Marker layer: fades in after the fill when animating. Nothing under it is
+            interactive, so it needs no pointer-events handling. */}
+        <View {...(animate ? markerMotion : {})} className="absolute inset-0">
+          {pos.listPrice !== undefined ? (
+            <Marker left={pos.listPrice} height={markerHeight} className="bg-ink" />
+          ) : null}
+          <Marker left={pos.estimate} height={markerHeight} className="bg-accent" />
+        </View>
       </View>
       <View className="h-4" onLayout={measure("row")}>
         <Text

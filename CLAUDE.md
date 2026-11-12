@@ -178,14 +178,41 @@ Components in `src/components/`:
     "Connection problem", "Took too long", "Something went wrong") and the unchanged
     `FAILURE_COPY` message in ink form one `role="alert"`. Retry (only when `RETRYABLE`)
     matches the Search button.
-16. `Reveal` — wraps one report section; fades it in and lifts it 16px on mount (see Motion).
+16. `Reveal` (+ `RevealGroup`, `useRevealProps`, `ScrollRootContext`) — the one reveal
+    system. `trigger="mount"` (default): the report's section reveal (Reanimated; also what
+    native uses). `trigger="load"` / `"scroll"`: web only, driven by
+    `src/motion/revealController.ts` (see Motion). Also `src/motion/CountUp.tsx` and
+    `src/motion/PulseDot.tsx`; `RangeBar` takes `animateDelayMs`.
 
-Motion: the report reveal is 350ms ease-out, opacity 0 → 1 and a 16px rise, staggered 80ms
-per section, once per arrival (it plays on mount, so Show all, theme changes and re-renders
-do not replay it). Built with Reanimated CSS animations, fill mode "backwards" and no
-opacity or transform on the wrapper's own style, so content at rest is always fully
-visible. Both the reveal and the skeleton pulse are off with reduced motion
-(`useReducedMotion`). No count-ups or bar animations.
+Motion (timings measured on the reference site; only opacity and transform animate, plus
+stroke-dashoffset for the hero arc and the header's background, border and blur):
+- Report reveal: 350ms ease-out, opacity 0 → 1 and a 16px rise, staggered 80ms per
+  section, once per arrival (Reanimated CSS animations, fill mode "backwards").
+- Landing reveals (web): 700ms `cubic-bezier(0.22, 1, 0.36, 1)`; headlines rise 24px,
+  paragraphs and mocks 16px, list rows 12px, small items 6px, the hero card 32px; labels
+  and chips slide 10px from the left; the receipt enters tilted -3°. Scroll reveals fire
+  when the item (or its `RevealGroup`) reaches 75% down the landing ScrollView (the
+  observer root); groups stagger 70ms (receipt lines 90ms); nested groups trigger with
+  their outer group. Hero load: headline lines at ~70/115/190/250ms, paragraph 320,
+  buttons 390, check line 440, shape scales in at 150 then drifts (16s, from 1.6s), arc
+  draws over 1.98s, card at 600.
+- State lives in DOM attributes React never sets (data-revealed), so theme switches and
+  Show all never replay. Never invisible: items are hidden only under `html.motion` (added
+  by the pre-paint script unless reduced motion), a CSS-only fallback shows them 1.5s
+  after they enter the page unless JavaScript has armed them, and armed items on screen
+  for 1.5s without their trigger are shown anyway.
+- Count-up (hero and report value): from 80% over 1.2s ease-out, once per value; the final
+  value reserves the width and is what screen readers get (the counting digits are
+  aria-hidden). Range bar (animated): track draws 0.7s, then fill grows 0.7s, then
+  markers fade in. Status dot pulse ring: 1.6s, scale and fade.
+- Header: solid paper at the top; past 41px of scroll, paper at 75%, a rule border and
+  `blur(12px) saturate(1.5)` over 0.3s `cubic-bezier(0.4, 0, 0.2, 1)`. It overlays the
+  content; pages pad their content 72px.
+- Hover (web, `@media (hover: hover)` only): cards (`lift`) rise 2px with an
+  accent-tinted shadow layer; buttons and chips (`press`) dim on hover and scale to 0.98
+  when pressed; 0.15s.
+- Reduced motion: everything in its final state at once (no reveal, count-up, drift,
+  pulse or line drawing). The motion CSS lives in `src/app/+html.tsx`.
 
 Accessibility: on web, every button-like control gets a 2px accent `:focus-visible` ring
 from the rule in `+html.tsx` (the address input draws its own). Tap targets are at least

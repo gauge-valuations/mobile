@@ -3,7 +3,8 @@ import { Card } from "@/components/Card";
 import { CompRow, type CompRowData } from "@/components/CompRow";
 import { HOW_IT_WORKS_ID } from "@/components/Header";
 import { useTokens } from "@/theme/tokens";
-import { FeatureSection, MockLabel } from "./Section";
+import { Reveal, RevealGroup } from "@/components/Reveal";
+import { FeatureSection, MockLabel, MOCK_ROWS_DELAY } from "./Section";
 import { HomesIcon } from "./icons";
 
 type Mark = "closest" | "dropped" | null;
@@ -30,8 +31,11 @@ function MarkLabel({ mark }: { mark: Exclude<Mark, null> }) {
   );
 }
 
+// Rows rise 12px one after another once the card is in; the match labels and status
+// chips slide in with them.
 function CompsMock() {
   return (
+    <View className="lift rounded-[18px]">
     <Card>
       <View className="flex-row items-center justify-between">
         <Text className="font-mono-medium font-medium text-[11px] leading-4 uppercase tracking-widest text-muted">
@@ -39,27 +43,35 @@ function CompsMock() {
         </Text>
         <MockLabel>Illustration</MockLabel>
       </View>
-      <View>
+      <RevealGroup baseDelay={MOCK_ROWS_DELAY}>
         {ROWS.map(({ comp, mark }, i) => (
-          <View
+          <Reveal
             key={comp.address}
+            trigger="scroll"
+            from="y12"
+            index={i}
             className={`rounded-xl px-3 -mx-3 ${mark === "closest" ? "bg-accent-tint" : ""} ${
               mark && i > 0 ? "mt-1" : ""
             }`}
           >
             {mark ? (
-              <View className="pt-2">
+              <Reveal trigger="scroll" from="x-10" index={i + 1} className="pt-2">
                 <MarkLabel mark={mark} />
-              </View>
+              </Reveal>
             ) : null}
             {/* A dropped comp is dimmed; its label above stays at full contrast. */}
             <View className={mark === "dropped" ? "opacity-50" : ""}>
-              <CompRow comp={comp} first={i === 0 || mark !== null || ROWS[i - 1].mark !== null} />
+              <CompRow
+                comp={comp}
+                first={i === 0 || mark !== null || ROWS[i - 1].mark !== null}
+                badgeRevealIndex={i + 1}
+              />
             </View>
-          </View>
+          </Reveal>
         ))}
-      </View>
+      </RevealGroup>
     </Card>
+    </View>
   );
 }
 

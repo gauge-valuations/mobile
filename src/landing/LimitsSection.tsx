@@ -3,27 +3,32 @@ import { Card } from "@/components/Card";
 import { LowConfidenceNote } from "@/components/LowConfidenceNote";
 import { Disclaimer } from "@/components/Disclaimer";
 import { useTokens } from "@/theme/tokens";
-import { FeatureSection } from "./Section";
+import { Reveal, RevealGroup } from "@/components/Reveal";
+import { FeatureSection, MOCK_ROWS_DELAY } from "./Section";
 import { InfoIcon } from "./icons";
 
 // The report's own low-confidence callout (shown when few comparable homes are usable)
 // and its disclaimer (shown on every report), as they appear there.
 function LimitsMock() {
   return (
-    <View className="gap-4">
+    <RevealGroup baseDelay={MOCK_ROWS_DELAY} className="gap-4">
+      <Reveal trigger="scroll" from="y12" index={0} className="lift rounded-[18px]">
       <Card>
         <Text className="font-mono-medium font-medium text-[11px] leading-4 uppercase tracking-widest text-muted">
           When few comps are usable
         </Text>
         <LowConfidenceNote />
       </Card>
+      </Reveal>
+      <Reveal trigger="scroll" from="y12" index={1} className="lift rounded-[18px]">
       <Card>
         <Text className="font-mono-medium font-medium text-[11px] leading-4 uppercase tracking-widest text-muted">
           On every report
         </Text>
         <Disclaimer />
       </Card>
-    </View>
+      </Reveal>
+    </RevealGroup>
   );
 }
 

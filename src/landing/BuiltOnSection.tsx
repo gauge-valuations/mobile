@@ -1,5 +1,6 @@
 import { View, Text } from "react-native";
 import { BAND } from "@/theme/tokens";
+import { Reveal, RevealGroup } from "@/components/Reveal";
 import { BandSection } from "./Section";
 import { LayersIcon } from "./icons";
 
@@ -15,8 +16,11 @@ export function BuiltOnSection() {
   return (
     <BandSection band="night">
       <View className="gap-12">
-        <View className="gap-5">
-          <LayersIcon color={BAND.nightAccent} />
+        <RevealGroup className="gap-5">
+          <Reveal trigger="scroll" from="y6" index={0}>
+            <LayersIcon color={BAND.nightAccent} />
+          </Reveal>
+          <Reveal trigger="scroll" from="y24" index={1}>
           <Text
             role="heading"
             aria-level={2}
@@ -24,23 +28,30 @@ export function BuiltOnSection() {
           >
             Built on tools you already trust.
           </Text>
-        </View>
-        <View className="rounded-[18px] border border-on-night/15 md:flex-row md:flex-wrap">
+          </Reveal>
+        </RevealGroup>
+        {/* The four cards appear one after another; each label slides in. */}
+        <RevealGroup className="rounded-[18px] border border-on-night/15 md:flex-row md:flex-wrap">
           {TOOLS.map((tool, i) => (
-            <View
+            <Reveal
               key={tool.name}
+              trigger="scroll"
+              from="y16"
+              index={i}
               className={`gap-2 p-6 md:w-1/2 lg:w-1/4 border-on-night/15 ${
                 i > 0 ? "border-t md:border-t-0" : ""
               } ${i % 2 === 1 ? "md:border-l" : ""} ${i >= 2 ? "md:border-t lg:border-t-0 lg:border-l" : ""}`}
             >
-              <Text className="font-mono-medium font-medium text-[11px] leading-4 uppercase tracking-widest text-night-accent">
-                {tool.kind}
-              </Text>
+              <Reveal trigger="scroll" from="x-10" index={i + 1}>
+                <Text className="font-mono-medium font-medium text-[11px] leading-4 uppercase tracking-widest text-night-accent">
+                  {tool.kind}
+                </Text>
+              </Reveal>
               <Text className="font-serif text-2xl text-on-night">{tool.name}</Text>
               <Text className="font-sans text-sm leading-5 text-night-muted">{tool.text}</Text>
-            </View>
+            </Reveal>
           ))}
-        </View>
+        </RevealGroup>
       </View>
     </BandSection>
   );

@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import { View, Text, Platform, type TextStyle } from "react-native";
+import { Reveal, RevealGroup } from "@/components/Reveal";
+import type { RevealFrom } from "@/motion/revealController";
 
 // Band backgrounds. night and forest are fixed in both themes (src/global.css); night
 // gets a top and bottom edge that only shows on dark paper. "grain" is a web-only noise
@@ -55,45 +57,63 @@ type FeatureProps = {
   mock: ReactNode;
   // Which side the text sits on from lg up; the mock takes the other side.
   textSide: "left" | "right";
+  // How the mock enters (default: rise 16px).
+  mockFrom?: RevealFrom;
 };
 
 // A feature section: icon, serif headline and paragraph in 5 of 12 columns, the mock
 // in 7, side by side from lg and alternating sides; stacked (text first) below lg.
-export function FeatureSection({ band, id, icon, headline, paragraph, mock, textSide }: FeatureProps) {
+// They reveal as one group when it reaches 75% down the screen: icon (6px), headline
+// (24px), paragraph and mock (16px), 70ms apart. The mock's own rows follow from 280ms.
+export function FeatureSection({ band, id, icon, headline, paragraph, mock, textSide, mockFrom = "y16" }: FeatureProps) {
   return (
     <BandSection band={band} id={id}>
-      <View
+      <RevealGroup
         className={`gap-12 lg:gap-8 lg:items-center ${
           textSide === "left" ? "lg:flex-row" : "lg:flex-row-reverse"
         }`}
       >
         <View className="gap-5 lg:flex-[5]">
-          {icon}
-          <Text
-            role="heading"
-            aria-level={2}
-            className={`font-serif text-[36px] leading-[38px] tracking-[-0.72px] lg:text-[60px] lg:leading-[63px] lg:tracking-[-1.2px] ${HEADLINE_TEXT[band]}`}
-            style={BALANCE}
-          >
-            {headline}
-          </Text>
-          <Text className={`font-sans text-lg leading-[29px] max-w-[560px] ${BODY_TEXT[band]}`}>
-            {paragraph}
-          </Text>
+          <Reveal trigger="scroll" from="y6" index={0}>
+            {icon}
+          </Reveal>
+          <Reveal trigger="scroll" from="y24" index={1}>
+            <Text
+              role="heading"
+              aria-level={2}
+              className={`font-serif text-[36px] leading-[38px] tracking-[-0.72px] lg:text-[60px] lg:leading-[63px] lg:tracking-[-1.2px] ${HEADLINE_TEXT[band]}`}
+              style={BALANCE}
+            >
+              {headline}
+            </Text>
+          </Reveal>
+          <Reveal trigger="scroll" from="y16" index={2}>
+            <Text className={`font-sans text-lg leading-[29px] max-w-[560px] ${BODY_TEXT[band]}`}>
+              {paragraph}
+            </Text>
+          </Reveal>
         </View>
-        <View className="lg:flex-[7]">{mock}</View>
-      </View>
+        <Reveal trigger="scroll" from={mockFrom} index={3} className="lg:flex-[7]">
+          {mock}
+        </Reveal>
+      </RevealGroup>
     </BandSection>
   );
 }
 
+// Base delay for row groups inside a mock, so rows start after the mock has appeared.
+export const MOCK_ROWS_DELAY = 280;
+
 // Small mono uppercase label above a mock (e.g. "Sample reports", "Illustration").
+// Slides in 10px from the left.
 export function MockLabel({ children, band = "paper" }: { children: string; band?: Band }) {
   return (
-    <Text
-      className={`font-mono-medium font-medium text-[11px] leading-4 uppercase tracking-widest ${BODY_TEXT[band]}`}
-    >
-      {children}
-    </Text>
+    <Reveal trigger="scroll" from="x-10" delay={MOCK_ROWS_DELAY}>
+      <Text
+        className={`font-mono-medium font-medium text-[11px] leading-4 uppercase tracking-widest ${BODY_TEXT[band]}`}
+      >
+        {children}
+      </Text>
+    </Reveal>
   );
 }

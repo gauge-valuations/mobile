@@ -1,7 +1,8 @@
 import { View, Text } from "react-native";
 import { formatMoney, formatSignedMoney } from "@/format";
 import { BAND } from "@/theme/tokens";
-import { FeatureSection, MockLabel } from "./Section";
+import { Reveal, RevealGroup } from "@/components/Reveal";
+import { FeatureSection, MockLabel, MOCK_ROWS_DELAY } from "./Section";
 import { MarginIcon } from "./icons";
 import { SAMPLE_REPORTS, SNAPSHOT_DATE, type SampleReport } from "./sampleReports";
 
@@ -29,28 +30,32 @@ const ROWS: Row[] = [
   { label: "Confidence", value: (r) => (r.lowConfidence ? "Low" : "Standard") },
 ];
 
-// The two sample homes side by side, on the night band.
+// The two sample homes side by side, on the night band. The two home columns appear
+// first, then the rows one by one.
 function ComparisonMock() {
   return (
     <View className="gap-4">
       <MockLabel band="night">{`Sample reports · ${SNAPSHOT_DATE}`}</MockLabel>
-      <View className="rounded-[18px] border border-on-night/15">
+      <RevealGroup baseDelay={MOCK_ROWS_DELAY} className="rounded-[18px] border border-on-night/15">
         <View className="flex-row border-b border-on-night/15">
           <View className="hidden sm:flex sm:flex-[4]" />
-          {SAMPLE_REPORTS.map((r) => (
-            <View key={r.address} className="flex-[5] px-4 py-4">
+          {SAMPLE_REPORTS.map((r, c) => (
+            <Reveal key={r.address} trigger="scroll" from="y12" index={c} className="flex-[5] px-4 py-4">
               <Text className="font-sans-medium font-medium text-sm text-on-night">
                 {r.address.split(",")[0]}
               </Text>
               <Text className="font-mono text-xs text-night-muted">
                 {r.address.split(",").slice(1).join(",").trim()}
               </Text>
-            </View>
+            </Reveal>
           ))}
         </View>
         {ROWS.map((row, i) => (
-          <View
+          <Reveal
             key={row.label}
+            trigger="scroll"
+            from="y12"
+            index={i + 2}
             className={`sm:flex-row ${i > 0 ? "border-t border-on-night/10" : ""}`}
           >
             <View className="px-4 pt-3 sm:py-4 sm:flex-[4]">
@@ -69,9 +74,9 @@ function ComparisonMock() {
                 </View>
               ))}
             </View>
-          </View>
+          </Reveal>
         ))}
-      </View>
+      </RevealGroup>
     </View>
   );
 }

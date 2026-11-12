@@ -5,6 +5,7 @@ import { Card } from "./Card";
 import { RangeBar } from "./RangeBar";
 import { MarginPill } from "./MarginPill";
 import { LowConfidenceNote } from "./LowConfidenceNote";
+import { CountUp } from "@/motion/CountUp";
 
 // NOTE: This is an ESTIMATED VALUE and a POTENTIAL MARGIN vs. list price only.
 // It is deliberately NOT value-minus-debt, since we cannot know what is owed on
@@ -39,9 +40,14 @@ export function ValuationCard({ valuation }: { valuation: Valuation }) {
       <View className="gap-1">
         {/* Line height ~1.1 (53px / 70px) leaves room for the "$" on Android; letter
             spacing is -0.02em written in px. */}
-        <Text className="font-serif text-ink text-[48px] leading-[53px] tracking-[-0.96px] md:text-[64px] md:leading-[70px] md:tracking-[-1.28px]">
-          {formatMoney(estimatedValue)}
-        </Text>
+        {/* Counts up from 80% once per report (1.2s, ease-out), starting with this card's
+            reveal; screen readers get the final value only. */}
+        <CountUp
+          value={estimatedValue}
+          format={formatMoney}
+          delayMs={80}
+          className="font-serif text-ink text-[48px] leading-[53px] tracking-[-0.96px] md:text-[64px] md:leading-[70px] md:tracking-[-1.28px]"
+        />
         {pricePerSqft !== undefined ? (
           <Text className="font-mono text-sm text-muted">{formatPricePerSqft(pricePerSqft)}</Text>
         ) : null}
@@ -56,6 +62,7 @@ export function ValuationCard({ valuation }: { valuation: Valuation }) {
           listPrice={listPrice}
           format={formatMoneyCompact}
           accessibilityLabel={rangeLabel}
+          animateDelayMs={200}
         />
       ) : null}
 

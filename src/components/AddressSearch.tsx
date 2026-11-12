@@ -82,7 +82,7 @@ export function AddressSearch({ onSearch, loading, showTitle, initialValue }: Ad
           onPress={submit}
           disabled={disabled}
           accessibilityRole="button"
-          className={`h-10 items-center justify-center rounded-lg px-4 ${
+          className={`press h-10 items-center justify-center rounded-lg px-4 ${
             disabled ? "bg-rule" : "bg-ink"
           }`}
         >
@@ -108,7 +108,7 @@ export function AddressSearch({ onSearch, loading, showTitle, initialValue }: Ad
             disabled={loading}
             accessibilityRole="button"
             accessibilityLabel={`Search ${address}`}
-            className="min-h-[40px] justify-center rounded-full"
+            className="press min-h-[40px] justify-center rounded-full"
           >
             <View className="rounded-full border border-rule bg-card px-3 py-1.5">
               <Text className="font-sans text-xs text-ink">{address}</Text>

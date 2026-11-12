@@ -5,7 +5,8 @@ import { RangeBar } from "@/components/RangeBar";
 import { MarketStrip } from "@/components/MarketSnapshotStrip";
 import { formatMoney, formatPricePerSqft } from "@/format";
 import { useTokens } from "@/theme/tokens";
-import { FeatureSection } from "./Section";
+import { Reveal, RevealGroup } from "@/components/Reveal";
+import { FeatureSection, MOCK_ROWS_DELAY } from "./Section";
 import { KeyIcon } from "./icons";
 import { PRENTICE } from "./sampleReports";
 
@@ -39,14 +40,16 @@ function RentMock() {
           `Estimate ${formatMoney(rent.monthly)} per month.`
         }
       />
-      <View>
+      <RevealGroup baseDelay={MOCK_ROWS_DELAY}>
         <Text className="font-mono-medium font-medium text-[11px] leading-4 uppercase tracking-widest text-muted pb-1">
           Rent comps
         </Text>
         {rent.comps.map((comp, i) => (
-          <CompRow key={comp.address} comp={comp} monthly first={i === 0} />
+          <Reveal key={comp.address} trigger="scroll" from="y12" index={i}>
+            <CompRow comp={comp} monthly first={i === 0} badgeRevealIndex={i + 1} />
+          </Reveal>
         ))}
-      </View>
+      </RevealGroup>
     </Card>
   );
 }

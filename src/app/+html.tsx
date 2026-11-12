@@ -44,6 +44,10 @@ const themeScript = `(function () {
   root.style.colorScheme = dark ? "dark" : "light";
   var metas = document.querySelectorAll('meta[name="theme-color"]');
   for (var i = 0; i < metas.length; i++) metas[i].setAttribute("content", dark ? "${DARK_BG}" : "${LIGHT_BG}");
+  // Motion is on unless the device asks for reduced motion. Reveal items are only
+  // hidden (until revealed) under this class; see motionCss.
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!reduce) root.classList.add("motion");
 })();`;
 
 // Subtle film grain for the landing page's forest band (class "grain"): grayscale SVG
@@ -64,6 +68,114 @@ const grainCss = `
   mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,${GRAIN_SVG}");
   background-size: 180px 180px;
+}
+`;
+
+// Motion for the landing page, the header and the report's range bar. Timings measured
+// on the reference site (CLAUDE.md "Motion"). Only opacity and transform animate, plus
+// stroke-dashoffset for the hero arc and the header's background, border and blur.
+// Reveal items (data-reveal-from) are hidden only under html.motion, and a CSS-only
+// fallback shows them 1.5s after they enter the page unless JavaScript has taken them
+// over (data-reveal-armed). src/motion/revealController.ts sets data-revealed.
+const motionCss = `
+:root { --ease-reveal: cubic-bezier(0.22, 1, 0.36, 1); --ease-ui: cubic-bezier(0.4, 0, 0.2, 1); }
+
+[data-reveal-from] {
+  transition-property: opacity, transform;
+  transition-duration: 700ms;
+  transition-timing-function: var(--ease-reveal);
+}
+[data-reveal-from="growx"] { transform-origin: left center; }
+html.motion [data-reveal-from]:not([data-revealed]):not([data-reveal-from="draw"]) { opacity: 0; }
+html.motion [data-reveal-from="y32"]:not([data-revealed]) { transform: translateY(32px); }
+html.motion [data-reveal-from="y24"]:not([data-revealed]) { transform: translateY(24px); }
+html.motion [data-reveal-from="y16"]:not([data-revealed]) { transform: translateY(16px); }
+html.motion [data-reveal-from="y12"]:not([data-revealed]) { transform: translateY(12px); }
+html.motion [data-reveal-from="y6"]:not([data-revealed]) { transform: translateY(6px); }
+html.motion [data-reveal-from="x-10"]:not([data-revealed]) { transform: translateX(-10px); }
+html.motion [data-reveal-from="scale"]:not([data-revealed]) { transform: scale(0.92); }
+html.motion [data-reveal-from="tilt"]:not([data-revealed]) { transform: translateY(16px) rotate(-3deg); }
+html.motion [data-reveal-from="growx"]:not([data-revealed]) { transform: scaleX(0); }
+
+/* The hero arc draws itself; its needle and hub fade in near the end. */
+[data-reveal-from="draw"] path {
+  stroke-dasharray: 34;
+  transition: stroke-dashoffset 1980ms var(--ease-reveal) var(--reveal-delay, 0ms);
+}
+[data-reveal-from="draw"] line, [data-reveal-from="draw"] circle {
+  transition: opacity 600ms var(--ease-reveal) calc(var(--reveal-delay, 0ms) + 1200ms);
+}
+html.motion [data-reveal-from="draw"]:not([data-revealed]) path { stroke-dashoffset: 34; }
+html.motion [data-reveal-from="draw"]:not([data-revealed]) line,
+html.motion [data-reveal-from="draw"]:not([data-revealed]) circle { opacity: 0; }
+
+/* Never invisible: without JavaScript taking over, show everything 1.5s in. */
+html.motion [data-reveal-from]:not([data-revealed]):not([data-reveal-armed]) {
+  animation: gauge-show 0s linear 1.5s forwards;
+}
+html.motion [data-reveal-from="draw"]:not([data-revealed]):not([data-reveal-armed]) path {
+  animation: gauge-draw-show 0s linear 1.5s forwards;
+}
+html.motion [data-reveal-from="draw"]:not([data-revealed]):not([data-reveal-armed]) line,
+html.motion [data-reveal-from="draw"]:not([data-revealed]):not([data-reveal-armed]) circle {
+  animation: gauge-show 0s linear 1.5s forwards;
+}
+@keyframes gauge-show { to { opacity: 1; transform: none; } }
+@keyframes gauge-draw-show { to { stroke-dashoffset: 0; } }
+
+/* Status dot ring: grows to 7px beyond the 8px dot and fades, every 1.6s. */
+html.motion .pulse-ring { animation: gauge-pulse 1.6s ease-in-out infinite; }
+@keyframes gauge-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.45; }
+  50% { transform: scale(2.75); opacity: 0; }
+}
+
+/* Hero shape: a slow drift, starting 1.6s after load. */
+html.motion .drift { animation: gauge-drift 16s ease-in-out 1.6s infinite; }
+@keyframes gauge-drift {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(-24px, 16px) rotate(-5deg); }
+  50% { transform: translate(10px, 24px) rotate(2.5deg); }
+  75% { transform: translate(24px, -12px) rotate(5deg); }
+}
+
+/* Header: background, border and blur change after 41px of scroll. */
+[data-header] {
+  transition: background-color 300ms var(--ease-ui), border-color 300ms var(--ease-ui),
+    backdrop-filter 300ms var(--ease-ui), -webkit-backdrop-filter 300ms var(--ease-ui);
+}
+[data-header][data-scrolled="true"] {
+  backdrop-filter: blur(12px) saturate(1.5);
+  -webkit-backdrop-filter: blur(12px) saturate(1.5);
+}
+
+/* Hover (pointer devices only) and press. Cards lift 2px; the accent-tinted shadow sits
+   on a layer whose opacity fades in. */
+.lift, .press { transition: transform 150ms var(--ease-ui), opacity 150ms var(--ease-ui); }
+.lift::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: 0 14px 30px -14px rgb(var(--color-accent) / 0.45);
+  opacity: 0;
+  transition: opacity 150ms var(--ease-ui);
+}
+@media (hover: hover) {
+  .lift:hover { transform: translateY(-2px); }
+  .lift:hover::after { opacity: 1; }
+  .press:hover { opacity: 0.88; }
+}
+.press:active { transform: scale(0.98); }
+
+/* Reduced motion: everything in its final state, nothing moves. */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal-from], [data-reveal-from] *, [data-header], .lift, .lift::after, .press,
+  .pulse-ring, .drift {
+    transition: none !important;
+    animation: none !important;
+  }
 }
 `;
 
@@ -93,6 +205,7 @@ export default function Root({ children }: PropsWithChildren) {
         <style dangerouslySetInnerHTML={{ __html: backgroundCss }} />
         <style dangerouslySetInnerHTML={{ __html: focusCss }} />
         <style dangerouslySetInnerHTML={{ __html: grainCss }} />
+        <style dangerouslySetInnerHTML={{ __html: motionCss }} />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body>{children}</body>

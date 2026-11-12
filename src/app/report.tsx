@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import { ScrollView, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -15,7 +16,7 @@ import { Disclaimer } from "@/components/Disclaimer";
 import { ReportSkeleton } from "@/components/ReportSkeleton";
 import { ErrorCard } from "@/components/ErrorCard";
 import { Reveal } from "@/components/Reveal";
-import { Header } from "@/components/Header";
+import { Header, HEADER_SCROLL_THRESHOLD } from "@/components/Header";
 import { IdleHero } from "@/components/IdleHero";
 
 // What the screen is showing. A discriminated union rather than a flat status plus
@@ -67,6 +68,9 @@ export default function ResultsScreen() {
   // The address most recently searched, so a URL change made by our own search (or a
   // re-render) does not run the same lookup twice.
   const lastSearchedRef = useRef<string | null>(null);
+  const [scrolled, setScrolled] = useState(false);
+  const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) =>
+    setScrolled(e.nativeEvent.contentOffset.y > HEADER_SCROLL_THRESHOLD);
 
   useEffect(() => {
     if (urlAddress.length > 0 && urlAddress !== lastSearchedRef.current) {
@@ -97,9 +101,14 @@ export default function ResultsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={["top", "left", "right"]}>
-      {/* Fixed above the ScrollView, so it stays visible over a long report. */}
-      <Header />
-      <ScrollView contentContainerClassName="w-full max-w-[720px] self-center p-4 gap-4" keyboardShouldPersistTaps="handled">
+      <View className="flex-1">
+      <ScrollView
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        // 72px for the header that overlays the content, plus the usual 16px.
+        contentContainerClassName="w-full max-w-[720px] self-center p-4 pt-[88px] gap-4"
+        keyboardShouldPersistTaps="handled"
+      >
         {/* The hero's slot stays in the tree (null when not idle) so AddressSearch keeps
             its position and is not remounted, which would clear the typed address. */}
         {screen.kind === "idle" ? <IdleHero /> : null}
@@ -146,6 +155,9 @@ export default function ResultsScreen() {
           </View>
         ) : null}
       </ScrollView>
+      {/* Overlays the top of the scrolling report; stays visible over a long report. */}
+      <Header scrolled={scrolled} />
+      </View>
     </SafeAreaView>
   );
 }
