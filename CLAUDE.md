@@ -81,9 +81,12 @@ even if a default template suggests it.
   unreachable — showing a fake report in place of a real failure is worse than showing an
   error. Do not "fix" this by adding a fallback.
 - Requests time out after 15 seconds. Failures are classified in `src/api.ts` as
-  `FetchFailureKind` (`bad_address` 400, `not_found` 404, `quota` 402, `server`, `network`,
-  `timeout`, `invalid`). The user-facing copy and retry policy per kind live in
-  `FAILURE_COPY` and `RETRYABLE` in `src/app/index.tsx`.
+  `FetchFailureKind` (`bad_address` 400, `not_found` 404, `quota` 402, `incomplete` 422,
+  `server`, `network`, `timeout`, `invalid`). `incomplete` is the backend's
+  `{ "error": "incomplete_data", "message": "..." }` for a record missing fields a report
+  needs; the app shows fixed copy (not the backend's message) and no Retry. The user-facing
+  copy and retry policy per kind live in `FAILURE_COPY` and `RETRYABLE` in
+  `src/app/report.tsx`.
 - Always handle four states: idle, loading, error, done.
 
 ## Deployment
@@ -173,9 +176,10 @@ Components in `src/components/`:
     the card color in both themes) and pulse (opacity 1 → 0.5 → 1, 1.4s); static with reduced
     motion. One `role="progressbar"` labelled "Loading report", `aria-busy`.
 15. `ErrorCard` — the error state, under the search. Tone per `FetchFailureKind`: wait-tint
-    with a `border-wait/40` border for bad_address, not_found, quota; loss-tint with
+    with a `border-wait/40` border for bad_address, not_found, quota, incomplete; loss-tint with
     `border-loss/40` for server, network, timeout, invalid. A mono label in the tone color
-    ("Check the address", "No data for this address", "Demo limit reached", "Server problem",
+    ("Check the address", "No data for this address", "Demo limit reached", "Incomplete
+    record", "Server problem",
     "Connection problem", "Took too long", "Something went wrong") and the unchanged
     `FAILURE_COPY` message in ink form one `role="alert"`. Retry (only when `RETRYABLE`)
     matches the Search button.

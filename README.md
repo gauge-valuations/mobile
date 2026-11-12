@@ -64,13 +64,14 @@ The Rentcast key lives only on the backend. The app calls one endpoint: `GET ${E
 
 **A typed contract that outlives the data source.** `src/types.ts` defines the `PropertyReport` shape the backend must return. `parsePropertyReport` checks incoming JSON against it at runtime and rejects anything that does not match, rather than rendering bad numbers. Nothing in the client refers to Rentcast. Changing or adding data providers is a backend change, as long as the response keeps this shape. That is why the contract, not the provider integration, is the part designed to last. New fields are optional, so an older backend response still validates. The backend keeps a byte-for-byte copy of this file.
 
-**Failures are classified, not swallowed.** `getPropertyReport` in `src/api.ts` maps each failure to one of seven kinds:
+**Failures are classified, not swallowed.** `getPropertyReport` in `src/api.ts` maps each failure to one of eight kinds:
 
 | Kind | Cause |
 | --- | --- |
 | `bad_address` | 400, the address could not be parsed |
 | `not_found` | 404, no data for that address |
 | `quota` | 402, the demo's monthly data limit is reached |
+| `incomplete` | 422 (`incomplete_data`), the provider's record for the address is missing fields a report needs, such as beds or square footage; the backend refuses rather than guess |
 | `server` | any other non-OK status |
 | `network` | the request never completed (offline, DNS, reset) |
 | `timeout` | no answer within 15 seconds |

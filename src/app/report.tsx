@@ -36,6 +36,8 @@ const FAILURE_COPY: Record<FetchFailureKind, string> = {
     "We couldn't find property data for that address. Check the street, city and ZIP, or tap one of the sample addresses above.",
   quota:
     "This demo has reached its monthly data limit, so new addresses can't be looked up right now. The two sample addresses above always work. Tap one to see a full report.",
+  incomplete:
+    "The property record for this address is missing details a report needs, so we can't estimate it reliably. Try another address or one of the samples above.",
   server: "We couldn't load this report right now. Please try again in a moment.",
   network: "We couldn't connect. Check your internet connection and try again.",
   timeout: "This is taking longer than usual. Please try again.",
@@ -49,6 +51,7 @@ const RETRYABLE: Record<FetchFailureKind, boolean> = {
   bad_address: false,
   not_found: false,
   quota: false,
+  incomplete: false,
   server: true,
   network: true,
   timeout: true,

@@ -12,6 +12,7 @@ export type FetchFailureKind =
   | "bad_address" // 400 — the address could not be parsed or geolocated
   | "not_found" // 404 — the address parsed fine; we have no data for it
   | "quota" // 402 — our data-provider budget is exhausted. Operator problem.
+  | "incomplete" // 422 — the provider's record for the address lacks fields a report needs
   | "server" // 5xx — backend or upstream failure
   | "network" // the request never completed (offline, DNS, connection reset)
   | "timeout" // the connection was fine; the backend did not answer in time
@@ -38,6 +39,9 @@ function kindForStatus(status: number): FetchFailureKind {
   if (status === 400) return "bad_address";
   if (status === 402) return "quota";
   if (status === 404) return "not_found";
+  // { "error": "incomplete_data", ... }: the record is missing required fields (beds,
+  // sqft, ...). The backend refuses rather than guess; asking again will not fix it.
+  if (status === 422) return "incomplete";
   return "server";
 }
 
